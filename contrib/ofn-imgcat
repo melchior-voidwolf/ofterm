@@ -30,17 +30,17 @@ if [ -f "$last" ]; then
 fi
 
 if [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v sips >/dev/null 2>&1; then
-  tmp="$(mktemp -t ofn-img).${last##*.}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/ofn-img.XXXXXX").${last##*.}"
   trap 'rm -f "$tmp"' EXIT
   sips -Z "$max_px" "$last" --out "$tmp" >/dev/null 2>&1 || cp "$last" "$tmp"
   args[${#args[@]}-1]="$tmp"
 elif [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v magick >/dev/null 2>&1; then
-  tmp="$(mktemp -t ofn-img).${last##*.}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/ofn-img.XXXXXX").${last##*.}"
   trap 'rm -f "$tmp"' EXIT
   magick "$last" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$last" "$tmp"
   args[${#args[@]}-1]="$tmp"
 elif [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v convert >/dev/null 2>&1; then
-  tmp="$(mktemp -t ofn-img).${last##*.}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/ofn-img.XXXXXX").${last##*.}"
   trap 'rm -f "$tmp"' EXIT
   convert "$last" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$last" "$tmp"
   args[${#args[@]}-1]="$tmp"
