@@ -19,11 +19,11 @@
     "arch_diff": {
       "x86": {
         "size": "3.5",
-        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_x86.fpk"
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk"
       },
       "arm": {
         "size": "3.2",
-        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_arm.fpk"
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk"
       }
     }
   }
