@@ -52,15 +52,17 @@ const staging = mkdtempSync(join(root, 'build/utils-bundle-'))
 const scratch = mkdtempSync(join(root, 'build/utils-archive-'))
 const tgz = join(scratch, 'utilities.tgz')
 try {
-  for (const name of binaries) {
-    const path = join(binDir, name)
-    if (!existsSync(path)) {
-      console.error(`missing ${path}; run: node scripts/build-utils.mjs`)
-      process.exit(1)
-    }
+  const missing = binaries.filter((name) => !existsSync(join(binDir, name)))
+  if (missing.length && process.env.UTILS_ALLOW_MISSING !== '1') {
+    for (const name of missing) console.error(`missing ${join(binDir, name)}; run: node scripts/build-utils.mjs`)
+    process.exit(1)
+  }
+  const present = binaries.filter((name) => !missing.includes(name))
+  for (const name of missing) {
+    console.warn(`warning: ${name} unavailable, package will fall back to shell scripts for that platform`)
   }
   for (const name of scripts) copyFileSync(join(root, 'contrib', name), join(staging, name))
-  for (const name of binaries) copyFileSync(join(binDir, name), join(staging, name))
+  for (const name of present) copyFileSync(join(binDir, name), join(staging, name))
   execFileSync(
     'tar',
     [...(process.platform === 'darwin' ? ['--no-xattrs'] : []), '--format=ustar', '-czf', tgz, '-C', staging, '.'],
