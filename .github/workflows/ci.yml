@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -46,12 +46,31 @@ jobs:
 
       - name: Build FPK (x86 + arm64)
         env:
-          VERSION: 0.1.0
+          VERSION: 0.1.0-dev
           FNPACK: fnpack
         run: node scripts/build-fpk.mjs --all
+
+      - name: Checksums
+        run: cd build/out && sha256sum *.fpk > SHA256SUMS
 
       - uses: actions/upload-artifact@v4
         with:
           name: ofterm-fpk
-          path: build/out/*.fpk
+          path: |
+            build/out/*.fpk
+            build/out/SHA256SUMS
           if-no-files-found: error
+
+      - name: Publish nightly pre-release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          name: Nightly
+          prerelease: true
+          make_latest: 'false'
+          generate_release_notes: false
+          files: |
+            build/out/ofterm_x86.fpk
+            build/out/ofterm_arm.fpk
+            build/out/SHA256SUMS
