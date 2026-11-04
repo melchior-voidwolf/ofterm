@@ -198,6 +198,22 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 	return s, nil
 }
 
+// sessionStartDir keeps fnOS sessions usable when the account home does not
+// exist yet (a known fnOS state) by falling back to a stable writable path.
+func sessionStartDir(home string) (string, error) {
+	if home != "" {
+		if st, err := os.Stat(home); err == nil && st.IsDir() {
+			return home, nil
+		}
+	}
+	for _, dir := range []string{"/vol1", "/tmp", "/"} {
+		if st, err := os.Stat(dir); err == nil && st.IsDir() {
+			return dir, nil
+		}
+	}
+	return "/", nil
+}
+
 func setSize(ptmx *os.File, cols, rows int) error {
 	return pty.Setsize(ptmx, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
 }
