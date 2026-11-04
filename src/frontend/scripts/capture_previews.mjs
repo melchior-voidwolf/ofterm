@@ -86,17 +86,28 @@ await page.getByRole('tab', { name: '帮助' }).click()
 await page.waitForTimeout(500)
 await shot('03-help')
 
+// 05 — inline images: full-width imgls grid + imgcat.
+await page.getByRole('button', { name: '取消', exact: true }).click()
+await page.waitForTimeout(400)
+await screens.first().click()
+await page.keyboard.press('Escape')
+await page.keyboard.type(':q!')
+await page.keyboard.press('Enter')
+await page.waitForTimeout(800)
+// Close the right pane so imgls has the full width.
+await page.getByRole('button', { name: /关闭 pane/ }).nth(1).click()
+await page.waitForTimeout(1000)
+await run(0, 'cd /tmp/ofterm-imgdemo; clear', 600)
+await run(0, '/tmp/ofterm-utils/ofn-imgls', 2600)
+await shot('05-imgls')
+
 // 04 — light theme workspace.
+await openSettings()
 await page.getByRole('tab', { name: '外观' }).click()
 await page.locator('.settings-row-control select').nth(0).selectOption('light')
 await page.getByRole('tab', { name: '配色' }).click()
 await page.locator('.theme-card').filter({ hasText: 'Light Background' }).click()
 await saveSettings()
-await screens.first().click()
-await page.keyboard.press('Escape')
-await page.keyboard.type(':q!')
-await page.keyboard.press('Enter') // force-quit vim back to the shell
-await page.waitForTimeout(800)
 await run(0, 'clear; printf "OFTerm  ·  fnOS\\n\\n"; uname -a', 1000)
 await shot('04-light')
 

@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>OFTerm - fnOS Terminal, iTerm2 Style</title>
+  <title>OFTerm - A Modern Terminal for fnOS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="OFTerm is an open-source, iTerm2-style terminal for fnOS. Split panes, smart tab titles, iTerm2 color presets, bilingual UI.">
+  <meta name="description" content="OFTerm is an open-source terminal for fnOS. Split panes, smart tab titles, inline images, classic color presets, bilingual UI.">
   <link rel="icon" type="image/png" href="img/icon_64.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,7 +107,7 @@
       <img src="img/icon_256.png" alt="OFTerm icon">
       <span class="wordmark">
         <div class="name">OFTerm</div>
-        <div class="tagline" data-i18n="tagline">为飞牛 fnOS 打造的 iTerm2 风格终端</div>
+        <div class="tagline" data-i18n="tagline">为飞牛 fnOS 打造的现代终端</div>
       </span>
     </div>
     <nav class="top-bar">
@@ -127,10 +127,10 @@
   <div class="wrap">
     <div class="main">
       <h3 data-i18n="what-title">什么是 OFTerm？</h3>
-      <p data-i18n="what-body">OFTerm 是运行在飞牛 fnOS 上的开源终端，界面与交互全面看齐 iTerm2：分屏、智能标签标题、iTerm2 经典配色、亮色/暗色主题、终端内搜索。后端为单个 Go 静态二进制，前端基于 xterm.js，通过 fnOS 统一网关运行，无遥测、无外部请求。</p>
+      <p data-i18n="what-body">OFTerm 是运行在飞牛 fnOS 上的开源终端：分屏、智能标签标题、终端内图片显示、经典配色、亮色/暗色主题、终端内搜索。后端为单个 Go 静态二进制，前端基于 xterm.js，通过 fnOS 统一网关运行，无遥测、无外部请求。</p>
 
       <h3 data-i18n="why-title">为什么用 OFTerm？</h3>
-      <p data-i18n="why-body">如果你习惯 iTerm2，打开 OFTerm 的一切都会感到熟悉：<kbd>⌘\</kbd> 向右分屏、标签标题自动跟随当前运行的程序（vim、ssh、htop……）、11 套 iTerm2 内置配色外加 Material Design Colors，还可以直接导入自己的 <code>.itermcolors</code>。如果你在终端里泡的时间很长，这些细节加起来就是效率。OFTerm 是自由软件，源码在 <a href="https://github.com/melchior-voidwolf/ofterm">GitHub</a> 上以 Apache-2.0 协议发布。</p>
+      <p data-i18n="why-body">如果你在终端里泡的时间很长，这些细节加起来就是效率：<kbd>⌘\</kbd> 向右分屏、标签标题自动跟随当前运行的程序（vim、ssh、htop……）、<code>imgcat</code> 让图片直接出现在终端里、11 套经典配色外加 Material Design Colors。OFTerm 是自由软件，源码在 <a href="https://github.com/melchior-voidwolf/ofterm">GitHub</a> 上以 Apache-2.0 协议发布。</p>
 
       <h3 data-i18n="how-title">如何安装？</h3>
       <p data-i18n="how-body">在 fnOS 应用中心添加自定义应用源，填入下面的地址即可看到并安装 OFTerm；也可以直接从 GitHub Releases 下载 fpk 手动安装。</p>
@@ -143,13 +143,19 @@
       </div>
 
       <div class="feature-block">
-        <h3 data-i18n="f-titles">标签标题跟随前台任务</h3>
-        <p data-i18n="f-titles-body">和 iTerm2 一样，标签标题不再永远是“Shell”——它实时显示当前正在运行的程序：打开 vim 显示 vim，连上 ssh 显示 ssh，跑起 htop 显示 htop。支持 shell 集成（OSC）的标题设置，两者自动取最新。</p>
+        <h3 data-i18n="f-inline">终端内图片（imgcat / imgls）</h3>
+        <p data-i18n="f-inline-body">OFTerm 完整支持 OSC 1337 内联图片协议：<code>imgcat</code> 把图片直接画进终端，<code>imgls</code> 以缩略图网格浏览整个目录。看一张刚生成的截图、确认日志里的图表、浏览相册——都不用离开终端窗口。图片随终端输出流式传输，在 ssh 到远端的 shell 里同样可用。</p>
+        <img class="shot" src="img/5.png" alt="Inline images with imgls and imgcat">
       </div>
 
       <div class="feature-block">
-        <h3 data-i18n="f-colors">iTerm2 配色</h3>
-        <p data-i18n="f-colors-body">内置 iTerm2 全部 11 套经典预设——Solarized Dark/Light、Tango、Pastel、Smoooooth 等等——外加默认的 Material Design Colors。也支持一键导入/导出 <code>.itermcolors</code> 文件。</p>
+        <h3 data-i18n="f-titles">标签标题跟随前台任务</h3>
+        <p data-i18n="f-titles-body">标签标题不再永远是“Shell”——它实时显示当前正在运行的程序：打开 vim 显示 vim，连上 ssh 显示 ssh，跑起 htop 显示 htop。支持 shell 集成（OSC）的标题设置，两者自动取最新。</p>
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-colors">经典配色</h3>
+        <p data-i18n="f-colors-body">内置 11 套经典终端配色——Solarized Dark/Light、Tango、Pastel、Smoooooth 等等——外加默认的 Material Design Colors。也支持一键导入/导出 <code>.itermcolors</code> 文件。</p>
         <img class="shot" src="img/2.png" alt="Color presets">
       </div>
 
@@ -190,22 +196,24 @@
 
   <script>
     const en = {
-      'tagline': 'An iTerm2-style terminal for fnOS',
+      'tagline': 'A modern terminal for fnOS',
       'nav-home': 'Home',
       'nav-features': 'Features',
       'nav-download': 'Downloads',
       'what-title': 'What is OFTerm?',
-      'what-body': 'OFTerm is an open-source terminal for fnOS, designed to feel like iTerm2: split panes, smart tab titles, the classic iTerm2 color presets, light and dark themes, and in-terminal search. The backend is a single static Go binary, the frontend is built on xterm.js, and it runs through the fnOS unified gateway. No telemetry, no external requests.',
+      'what-body': 'OFTerm is an open-source terminal for fnOS: split panes, smart tab titles, inline images, classic color presets, light and dark themes, and in-terminal search. The backend is a single static Go binary, the frontend is built on xterm.js, and it runs through the fnOS unified gateway. No telemetry, no external requests.',
       'why-title': 'Why do I want it?',
-      'why-body': 'If you live in iTerm2, everything here is familiar: ⌘\\ splits right, tab titles follow the program you are running (vim, ssh, htop…), all 11 built-in iTerm2 color presets plus Material Design Colors, and you can import your own .itermcolors. If you spend a lot of time in a terminal, these little things add up. OFTerm is free software, released on GitHub under the Apache-2.0 license.',
+      'why-body': 'If you spend a lot of time in a terminal, the little things add up: ⌘\\ splits right, tab titles follow the program you are running (vim, ssh, htop…), imgcat draws images right in the terminal, and 11 classic color presets ship alongside Material Design Colors. OFTerm is free software, released on GitHub under the Apache-2.0 license.',
       'how-title': 'How do I install it?',
       'how-body': 'Add a custom app source in the fnOS App Center with the address below, and OFTerm appears ready to install. You can also grab the fpk directly from GitHub Releases.',
       'f-split': 'Split Panes & Tabs',
       'f-split-body': 'Slice a tab into as many panes as you like, vertically and horizontally. Each pane is an independent session with split and close controls in the corner, and draggable dividers. Inactive panes are slightly dimmed so the active one is obvious.',
+      'f-inline': 'Inline Images (imgcat / imgls)',
+      'f-inline-body': 'OFTerm fully supports the OSC 1337 inline image protocol: imgcat draws images right in the terminal, and imgls browses a whole directory as a thumbnail grid. Check a freshly generated screenshot, glance at a chart in a log, browse a photo folder — all without leaving the terminal. Images stream with the terminal output, so they work inside remote shells over ssh too.',
       'f-titles': 'Tab Titles Follow the Foreground Job',
-      'f-titles-body': 'Just like iTerm2, a tab is no longer called “Shell” forever — it shows what is actually running: vim while you edit, ssh while you are away, htop while you watch. Shell-integration (OSC) titles are honored too; the freshest title always wins.',
-      'f-colors': 'iTerm2 Color Presets',
-      'f-colors-body': 'All 11 classic iTerm2 presets are built in — Solarized Dark/Light, Tango, Pastel, Smoooooth and more — plus the default Material Design Colors. One-click import and export of .itermcolors files is supported.',
+      'f-titles-body': 'A tab is no longer called “Shell” forever — it shows what is actually running: vim while you edit, ssh while you are away, htop while you watch. Shell-integration (OSC) titles are honored too; the freshest title always wins.',
+      'f-colors': 'Classic Color Presets',
+      'f-colors-body': 'Eleven classic terminal color schemes are built in — Solarized Dark/Light, Tango, Pastel, Smoooooth and more — plus the default Material Design Colors. One-click import and export of .itermcolors files is supported.',
       'f-shortcuts': 'Shortcuts & Help',
       'f-shortcuts-body': 'New tab, split, close pane, search and clear all have handy shortcuts, with separate keymaps for macOS and Windows/Linux. A built-in help page lists them all.',
       'f-theme': 'Light & Dark',
