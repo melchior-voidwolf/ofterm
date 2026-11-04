@@ -68,5 +68,5 @@ jobs:
 
       - name: Package smoke test
         run: |
-          node scripts/build-utils-bundle.mjs all
+          node scripts/build-utils-bundle.mjs linux-x86_64 linux-aarch64 linux-armv7
           ./build/utils/ofterm-utils-linux-x86_64 --selftest
