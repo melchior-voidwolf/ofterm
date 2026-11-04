@@ -32,11 +32,17 @@ for name in $FILES; do
   mv "$tmp/$name" "$dest"
 done
 
+export PATH="$PREFIX:$PATH"
+for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.profile"; do
+  [ -f "$rc" ] || continue
+  grep -q "OFTerm utilities PATH" "$rc" || {
+    echo "# OFTerm utilities PATH" >> "$rc"
+    echo "export PATH=\"$PREFIX:\$PATH\"" >> "$rc"
+  }
+done
+
 echo
 echo "Installed OFTerm utilities in $PREFIX"
-case ":$PATH:" in
-  *":$PREFIX:"*) ;;
-  *) echo "Add this to your shell profile: export PATH=\"$PREFIX:\$PATH\"" ;;
-esac
+echo "PATH updated for this shell and future shells."
 echo
 echo "Try: imgcat image.png   imgls .   ofn-notify 'build done'   ofn-dl report.pdf"

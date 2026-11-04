@@ -19,7 +19,7 @@ const files = [
 const tmp = mkdtempSync(join(root, 'build/utils-'))
 const tgz = join(tmp, 'utilities.tgz')
 try {
-  execFileSync('tar', ['-czf', tgz, '-C', join(root, 'contrib'), ...files], {
+  execFileSync('tar', [...(process.platform === 'darwin' ? ['--no-xattrs'] : []), '--format=ustar', '-czf', tgz, '-C', join(root, 'contrib'), ...files], {
     env: { ...process.env, COPYFILE_DISABLE: '1' },
   })
   const base64 = readFileSync(tgz).toString('base64')

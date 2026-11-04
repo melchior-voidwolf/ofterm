@@ -132,20 +132,19 @@ function Workspace({ me }: { me: Me }) {
   }, [mode])
 
   useEffect(() => {
-    let timer: number | undefined
     const onNotify = (event: Event) => {
       const detail = (event as CustomEvent<{ message: string; kind?: string }>).detail
-      if (!detail?.message) return
-      setToast(detail)
-      if (timer) window.clearTimeout(timer)
-      timer = window.setTimeout(() => setToast(null), 3200)
+      if (detail?.message) setToast(detail)
     }
     window.addEventListener('ofterm:notify', onNotify)
-    return () => {
-      window.removeEventListener('ofterm:notify', onNotify)
-      if (timer) window.clearTimeout(timer)
-    }
+    return () => window.removeEventListener('ofterm:notify', onNotify)
   }, [])
+
+  useEffect(() => {
+    if (!toast) return
+    const timer = window.setTimeout(() => setToast(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [toast])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -364,11 +363,22 @@ function Workspace({ me }: { me: Me }) {
       'if command -v openssl >/dev/null 2>&1; then openssl base64 -d -A < "$f" | tar -xzf - -C "$d"; else base64 -d < "$f" | tar -xzf - -C "$d"; fi',
       'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-imgcat "$d"/ofn-imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
       'rm -f "$f"',
-      'printf "OFTerm utilities installed in %s\\n" "$d"',
+      'if [ -x "$d/ofn-check" ]; then',
+      '  export PATH="$d:$PATH"',
+      '  hash -r 2>/dev/null || true',
+      '  for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.profile"; do',
+      '    [ -f "$rc" ] || continue',
+      '    grep -q "OFTerm utilities PATH" "$rc" || { echo "# OFTerm utilities PATH" >> "$rc"; echo \'export PATH="$HOME/.local/bin:$PATH"\' >> "$rc"; }',
+      '  done',
+      '  clear',
+      '  printf "OFTerm utilities installed in %s\\n" "$d"',
+      'else',
+      '  printf "OFTerm utilities install failed\\n"',
+      'fi',
     ]
     activeClient.runCommand(lines.join('\n'))
     setSettingsOpen(false)
-    setToast({ message: '正在从内置脚本安装辅助工具', kind: 'success' })
+    setToast({ message: '辅助工具安装已启动', kind: 'success' })
   }, [activeClient])
 
   const closeSearch = () => {
