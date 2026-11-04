@@ -10,6 +10,8 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 
+![OFTerm workspace](ofterm/Preview/1.png)
+
 > **状态：预发布。** x86_64 与 arm64 安装包已经可以构建，但尚未提交或通过飞牛官方商店审核。首个稳定版前，界面与打包结构仍可能调整。
 
 ## 设计原则
@@ -116,6 +118,14 @@ contrib/                     iTerm2 兼容辅助脚本
 docs/                        架构、安全、隐私、兼容性文档
 ```
 
+## 下载
+
+- **release 分支构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk
+- **release 分支构建（ARM）：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk
+- **稳定版：** 打 `v*` tag 后使用 `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_x86.fpk`（或 `ofterm_arm.fpk`）。
+
+`fnpack.json` 指向稳定版；预发布构建使用显式的 `release` tag。
+
 ## 构建
 
 依赖：Go 1.27+、Node.js 22+、官方 `fnpack` CLI。
@@ -149,8 +159,9 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 ## CI 与发布
 
-- `.github/workflows/ci.yml`：构建并测试前后端，产出双架构 FPK 作为 artifacts。
-- `.github/workflows/release.yml`：在 `v*` tag 上构建双架构包，生成 `SHA256SUMS`，发布 GitHub Release。
+- `.github/workflows/ci.yml`：在 `main`/`master`/PR 上运行前端测试与构建、后端 vet/测试和 Linux 交叉编译，不发布安装包。
+- `.github/workflows/release.yml`：在 `release` 分支和 `v*` tag 上构建。推送到 `release` 发布会滚动预发布（tag 为 `release`）；`v*` tag 发布稳定版。
+- 两个渠道都会附加 `ofterm_x86.fpk`、`ofterm_arm.fpk` 和 `SHA256SUMS`。
 - `build/architectures.json` 是唯一的架构来源。新增 Go 支持的架构不需要修改后端。
 
 ## 安全与隐私

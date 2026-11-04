@@ -10,6 +10,8 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 
+![OFTerm workspace](ofterm/Preview/1.png)
+
 > **Status:** pre-release. The package builds for x86_64 and arm64, but it has not yet been submitted to or approved by the fnOS app store. Interfaces and packaging may change before the first stable release.
 
 ## Design
@@ -118,6 +120,14 @@ contrib/                     iTerm2-compatible utilities
 docs/                        architecture, security, privacy, compatibility
 ```
 
+## Download
+
+- **Release branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk
+- **Release branch build (ARM):** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk
+- **Stable release:** after a `v*` tag, use `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_x86.fpk` (or `ofterm_arm.fpk`).
+
+`fnpack.json` points at the stable release; prerelease builds use the `release` tag explicitly.
+
 ## Build
 
 Requirements: Go 1.27+, Node.js 22+, and the official `fnpack` CLI.
@@ -151,8 +161,9 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` builds and tests the frontend and backend, then produces both FPKs as artifacts.
-- `.github/workflows/release.yml` runs on `v*` tags, builds both architectures, writes `SHA256SUMS`, and publishes a GitHub Release.
+- `.github/workflows/ci.yml` runs on `main`/`master`/PRs: frontend tests/build, backend vet/tests, and linux cross-compilation. It does not publish packages.
+- `.github/workflows/release.yml` runs on the `release` branch and on `v*` tags. Pushes to `release` publish a rolling prerelease (tag `release`); tags publish a stable release.
+- Both channels attach `ofterm_x86.fpk`, `ofterm_arm.fpk`, and `SHA256SUMS`.
 - `build/architectures.json` is the only architecture source. Adding a Go-supported target does not require backend changes.
 
 ## Security and privacy
