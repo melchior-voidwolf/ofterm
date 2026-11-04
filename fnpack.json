@@ -36,6 +36,24 @@
       "is_docker": false,
       "service_port": "",
       "releases": {
+        "1.1.0": {
+          "changelog": "参见 Release notes:https://github.com/melchior-voidwolf/ofterm/releases/tag/v1.1.0",
+          "updated_at": "2026-11-04T19:03:43.678Z",
+          "os_min_version": "",
+          "os_max_version": "",
+          "packages": {
+            "x86": {
+              "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.0/ofterm_1.1.0_x86.fpk",
+              "sha256": "e5989c1acfcaa693df5fd27b3973cd75e5916299213722c8e6ff5f89aa5577da",
+              "size": 8308791
+            },
+            "arm": {
+              "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.0/ofterm_1.1.0_arm.fpk",
+              "sha256": "8e8e7de7ba49d8a8174738b5e8ec6937ba83930a770b4300fe85f58e97bb57a1",
+              "size": 7998584
+            }
+          }
+        },
         "1.0.0": {
           "changelog": "1.0.0 首个稳定版:WebSocket 认证参数增加 query 回退,兼容剥离 subprotocol 的网关;增加 WS 诊断日志;会话启动目录在 home 不存在时自动回退。",
           "updated_at": "2026-11-04T23:30:00+08:00",
