@@ -135,6 +135,15 @@ docs/                        架构、安全、隐私、兼容性文档
 
 `fnpack.json` 指向稳定版；预发布构建使用显式的 `release` tag。
 
+### 将 OFTerm 添加为自定义源
+
+本仓库本身就是一个 FnDepot 兼容源。在 FnDepot、New Store 或 Moo 的源管理中添加以下任一地址：
+
+- 仓库根地址：`https://github.com/melchior-voidwolf/ofterm`
+- 索引直链（更稳定）：`https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/fnpack.json`
+
+同步源后搜索 **OFTerm** 即可安装。
+
 ## 构建
 
 依赖：Go 1.27+、Node.js 22+、官方 `fnpack` CLI。

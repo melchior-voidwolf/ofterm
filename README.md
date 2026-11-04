@@ -137,6 +137,15 @@ docs/                        architecture, security, privacy, compatibility
 
 `fnpack.json` points at the stable release; prerelease builds use the `release` tag explicitly.
 
+### Add OFTerm as a custom app source
+
+This repository is itself a FnDepot-compatible source. In FnDepot, New Store, or Moo, open source management and add either:
+
+- Repository root: `https://github.com/melchior-voidwolf/ofterm`
+- Index URL (more stable): `https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/fnpack.json`
+
+Sync the source, then search for **OFTerm**.
+
 ## Build
 
 Requirements: Go 1.27+, Node.js 22+, and the official `fnpack` CLI.
