@@ -15,13 +15,26 @@ const root = resolve(here, '..')
 const crate = join(root, 'utilities')
 const outDir = join(root, 'build/utils')
 
+// Optional filter: `linux` / `darwin` or explicit target names. CI builds the
+// two platforms on separate runners (each can only link its own macOS SDK).
+const filters = process.argv.slice(2)
+const selected = (target) =>
+  filters.length === 0 ||
+  filters.includes(target.name) ||
+  filters.some((f) => target.name.startsWith(f))
+
 const targets = [
   { rust: 'x86_64-unknown-linux-musl', name: 'linux-x86_64' },
   { rust: 'aarch64-unknown-linux-musl', name: 'linux-aarch64' },
   { rust: 'armv7-unknown-linux-musleabihf', name: 'linux-armv7' },
   { rust: 'x86_64-apple-darwin', name: 'darwin-x86_64', hostOnly: 'darwin' },
   { rust: 'aarch64-apple-darwin', name: 'darwin-arm64', hostOnly: 'darwin' },
-]
+].filter(selected)
+
+if (!targets.length) {
+  console.error(`no targets matched ${filters.join(', ')}`)
+  process.exit(1)
+}
 
 const clang = process.env.CLANG || (process.platform === 'darwin' ? '/opt/homebrew/opt/llvm/bin/clang' : 'clang')
 

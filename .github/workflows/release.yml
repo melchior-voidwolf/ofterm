@@ -30,7 +30,7 @@ jobs:
       - name: Build Linux utilities
         env:
           CLANG: clang
-        run: node scripts/build-utils.mjs
+        run: node scripts/build-utils.mjs linux
 
       - uses: actions/upload-artifact@v4
         with:
@@ -52,7 +52,7 @@ jobs:
           node-version: 22
 
       - name: Build macOS utilities
-        run: node scripts/build-utils.mjs
+        run: node scripts/build-utils.mjs darwin
 
       - uses: actions/upload-artifact@v4
         with:
