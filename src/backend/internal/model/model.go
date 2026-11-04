@@ -14,6 +14,7 @@ type Identity struct {
 // colour settings live here; the frontend may extend this with defaults.
 type Settings struct {
 	UITheme        string        `json:"uiTheme"` // system | light | dark
+	Language       string        `json:"language"` // auto | zh-CN | en-US
 	ThemeID        string        `json:"themeId"`
 	FontFamily     string        `json:"fontFamily"`
 	FontSize       int           `json:"fontSize"`
@@ -40,6 +41,7 @@ type CustomTheme struct {
 func DefaultSettings() Settings {
 	return Settings{
 		UITheme:        "system",
+		Language:       "auto",
 		ThemeID:        "material-design-colors",
 		FontFamily:     `Monaco, Menlo, "SF Mono", "DejaVu Sans Mono", "JetBrains Mono", monospace`,
 		FontSize:       12,

@@ -2,6 +2,7 @@ import type { CustomTheme } from '../theme'
 
 export interface Settings {
   uiTheme: 'system' | 'light' | 'dark'
+  language: 'auto' | 'zh-CN' | 'en-US'
   themeId: string
   fontFamily: string
   fontSize: number
@@ -22,6 +23,7 @@ export const DEFAULT_FONT_FAMILY =
 
 export const defaultSettings: Settings = {
   uiTheme: 'system',
+  language: 'auto',
   themeId: 'material-design-colors',
   fontFamily: DEFAULT_FONT_FAMILY,
   fontSize: 12,

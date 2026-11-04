@@ -58,6 +58,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	if in.TabStyle != "iterm2" && in.TabStyle != "fnos" {
 		in.TabStyle = current.TabStyle
 	}
+	if in.Language != "auto" && in.Language != "zh-CN" && in.Language != "en-US" {
+		in.Language = current.Language
+	}
 	if len(in.FontFamily) > 256 {
 		in.FontFamily = current.FontFamily
 	}
