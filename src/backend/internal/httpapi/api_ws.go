@@ -35,10 +35,10 @@ func (s *Server) handleCreateTicket(w http.ResponseWriter, r *http.Request) {
 		Rows:         req.Rows,
 		GraceSeconds: req.GraceSeconds,
 		UID:          id.UID,
-		Username: id.Username,
-		IsAdmin:  id.IsAdmin,
-		Listener: ci.Kind,
-		Origin:   r.Header.Get("Origin"),
+		Username:     id.Username,
+		IsAdmin:      id.IsAdmin,
+		Listener:     ci.Kind,
+		Origin:       r.Header.Get("Origin"),
 	}
 	token, exp, err := s.auth.NewTicket(spec)
 	if err != nil {
@@ -65,11 +65,11 @@ func wsProtocolToken(r *http.Request, prefix string) string {
 func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 	id, ok := s.identity(r)
 	if !ok {
-		writeError(w, http.StatusUnauthorized, "unauthorized", "authentication required")
+		s.writeWSError(w, http.StatusUnauthorized, "unauthorized", "authentication required")
 		return
 	}
 	if !s.originAllowed(r) {
-		writeError(w, http.StatusForbidden, "origin", "origin not allowed")
+		s.writeWSError(w, http.StatusForbidden, "origin", "origin not allowed")
 		return
 	}
 	ci, _ := gateway.FromContext(r.Context())
@@ -92,11 +92,11 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 	if sessionID != "" {
 		existing, found := s.term.Get(sessionID)
 		if !found {
-			writeError(w, http.StatusNotFound, "session_not_found", "session has ended")
+			s.writeWSError(w, http.StatusNotFound, "session_not_found", "session has ended")
 			return
 		}
 		if existing.UID != id.UID {
-			writeError(w, http.StatusForbidden, "forbidden", "session belongs to another user")
+			s.writeWSError(w, http.StatusForbidden, "forbidden", "session belongs to another user")
 			return
 		}
 		token := wsProtocolToken(r, "resume")
@@ -104,7 +104,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 			token = r.URL.Query().Get("resumeToken")
 		}
 		if subtle.ConstantTimeCompare([]byte(existing.ResumeToken), []byte(token)) != 1 {
-			writeError(w, http.StatusForbidden, "invalid_resume", "invalid resume token")
+			s.writeWSError(w, http.StatusForbidden, "invalid_resume", "invalid resume token")
 			return
 		}
 		lastSeqRaw := wsProtocolToken(r, "seq")
@@ -116,7 +116,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		sub, replay, err = existing.Attach(lastSeq)
 		if err != nil {
 			existing.Kill("resume failed")
-			writeError(w, http.StatusGone, "resume_failed", err.Error())
+			s.writeWSError(w, http.StatusGone, "resume_failed", err.Error())
 			return
 		}
 		sess = existing
@@ -128,20 +128,20 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		}
 		spec, ok := s.auth.ConsumeTicket(ticket)
 		if !ok {
-			writeError(w, http.StatusUnauthorized, "invalid_ticket", "ticket is invalid or expired")
+			s.writeWSError(w, http.StatusUnauthorized, "invalid_ticket", "ticket is invalid or expired")
 			return
 		}
 		if spec.UID != id.UID {
-			writeError(w, http.StatusForbidden, "forbidden", "ticket belongs to another user")
+			s.writeWSError(w, http.StatusForbidden, "forbidden", "ticket belongs to another user")
 			return
 		}
 		ci, _ := gateway.FromContext(r.Context())
 		if spec.Listener != ci.Kind {
-			writeError(w, http.StatusForbidden, "listener_mismatch", "ticket was issued for another listener")
+			s.writeWSError(w, http.StatusForbidden, "listener_mismatch", "ticket was issued for another listener")
 			return
 		}
 		if spec.Origin != "" && r.Header.Get("Origin") != "" && spec.Origin != r.Header.Get("Origin") {
-			writeError(w, http.StatusForbidden, "origin_mismatch", "ticket origin mismatch")
+			s.writeWSError(w, http.StatusForbidden, "origin_mismatch", "ticket origin mismatch")
 			return
 		}
 		var runAs *term.RunAs
@@ -161,7 +161,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		sub, replay, err = sess.Attach(0)
 		if err != nil {
 			sess.Kill("attach failed")
-			writeError(w, http.StatusInternalServerError, "attach_failed", err.Error())
+			s.writeWSError(w, http.StatusInternalServerError, "attach_failed", err.Error())
 			return
 		}
 		s.store.Audit(id.UID, "session.start", sess.ID)
@@ -177,6 +177,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		sess.Kill("websocket accept failed")
 		return
 	}
+	s.log.Info("terminal websocket accepted", "resumed", resumed)
 	defer conn.CloseNow()
 	conn.SetReadLimit(maxFrameBytes)
 
@@ -280,16 +281,22 @@ func lastSeqFromQuery(r *http.Request) uint64 {
 	return v
 }
 
+// writeWSError records failures that browsers hide during a failed upgrade.
+// Never log the request URL, protocol header, ticket, or resume token.
+func (s *Server) writeWSError(w http.ResponseWriter, status int, code, message string) {
+	s.log.Warn("terminal websocket rejected", "status", status, "code", code, "error", message)
+	writeError(w, status, code, message)
+}
 
 func (s *Server) writeTermError(w http.ResponseWriter, err error) {
 	msg := err.Error()
 	switch {
 	case strings.Contains(msg, "too many"):
-		writeError(w, http.StatusTooManyRequests, "too_many_sessions", msg)
+		s.writeWSError(w, http.StatusTooManyRequests, "too_many_sessions", msg)
 	case strings.Contains(msg, "shell"):
-		writeError(w, http.StatusBadRequest, "invalid_shell", msg)
+		s.writeWSError(w, http.StatusBadRequest, "invalid_shell", msg)
 	default:
-		writeError(w, http.StatusInternalServerError, "terminal", msg)
+		s.writeWSError(w, http.StatusInternalServerError, "terminal", msg)
 	}
 }
 

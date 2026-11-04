@@ -2,13 +2,13 @@ package term
 
 import (
 	"fmt"
-	"time"
 	"os"
 	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/creack/pty"
 )
@@ -143,6 +143,7 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 		"OFTERM=1",
 		"OFTERM_SESSION="+id,
 	)
+	home := ""
 	if target != nil {
 		cmd.Env = append(cmd.Env,
 			"HOME="+target.HomeDir,
@@ -150,14 +151,13 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 			"LOGNAME="+target.Username,
 			"SHELL="+shell,
 		)
-		if target.HomeDir != "" {
-			cmd.Dir = target.HomeDir
-		}
+		home = target.HomeDir
+	} else {
+		home, _ = os.UserHomeDir()
 	}
-	if cmd.Dir == "" {
-		if home, err := os.UserHomeDir(); err == nil {
-			cmd.Dir = home
-		}
+	cmd.Dir, err = sessionStartDir(home)
+	if err != nil {
+		return nil, err
 	}
 	attrs := &syscall.SysProcAttr{}
 	if switchUser {
@@ -170,7 +170,7 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 
 	ptmx, err := pty.StartWithSize(cmd, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("start %q in directory %q: %w", shell, cmd.Dir, err)
 	}
 
 	s := &Session{
