@@ -86,7 +86,7 @@ func (s *Server) Handler() http.Handler {
 				writeError(w, http.StatusForbidden, "csrf", "missing request header")
 				return
 			}
-			if origin := r.Header.Get("Origin"); origin != "" && !originAllowed(origin, r.Host) {
+			if !s.originAllowed(r) {
 				writeError(w, http.StatusForbidden, "origin", "origin not allowed")
 				return
 			}
@@ -180,16 +180,32 @@ func isMutation(method string) bool {
 	}
 }
 
-func originAllowed(origin, host string) bool {
+func (s *Server) originAllowed(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true
+	}
 	u, err := url.Parse(origin)
 	if err != nil || u.Host == "" {
 		return false
 	}
-	if strings.EqualFold(u.Host, host) {
+	for _, raw := range []string{r.Host, r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Original-Host")} {
+		for _, candidate := range strings.Split(raw, ",") {
+			candidate = strings.TrimSpace(candidate)
+			if candidate != "" && (strings.EqualFold(candidate, u.Host) || strings.EqualFold(candidate, u.Hostname())) {
+				return true
+			}
+		}
+	}
+	switch u.Hostname() {
+	case "localhost", "127.0.0.1", "::1":
 		return true
 	}
-	h := u.Hostname()
-	return h == "localhost" || h == "127.0.0.1" || h == "::1"
+	// fnOS already authenticated the request before the gateway forwarded it.
+	// The gateway may rewrite Host for the Unix socket, so do not reject the
+	// public Origin in this listener.
+	ci, _ := gateway.FromContext(r.Context())
+	return ci.Kind == "gateway"
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

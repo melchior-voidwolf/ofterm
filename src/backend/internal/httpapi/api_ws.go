@@ -68,7 +68,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized", "authentication required")
 		return
 	}
-	if !wsOriginAllowed(r) {
+	if !s.originAllowed(r) {
 		writeError(w, http.StatusForbidden, "origin", "origin not allowed")
 		return
 	}
@@ -272,13 +272,6 @@ func lastSeqFromQuery(r *http.Request) uint64 {
 	return v
 }
 
-func wsOriginAllowed(r *http.Request) bool {
-	origin := r.Header.Get("Origin")
-	if origin == "" {
-		return true
-	}
-	return originAllowed(origin, r.Host)
-}
 
 func (s *Server) writeTermError(w http.ResponseWriter, err error) {
 	msg := err.Error()
