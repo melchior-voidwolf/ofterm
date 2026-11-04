@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as Switch from '@radix-ui/react-switch'
@@ -19,6 +19,20 @@ interface Props {
 export function SettingsDialog({ open, onOpenChange, settings, onChange, onInstallUtilities }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [themeError, setThemeError] = useState('')
+  // Edits apply to a local draft; nothing persists until 保存.
+  const [draft, setDraft] = useState<Settings>(settings)
+  useEffect(() => {
+    if (open) {
+      setDraft(settings)
+      setThemeError('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+  const patch = (p: Partial<Settings>) => setDraft((d) => ({ ...d, ...p }))
+  const save = () => {
+    onChange(draft)
+    onOpenChange(false)
+  }
   const intValue = (raw: string, fallback: number) => {
     if (raw.trim() === '') return fallback
     const n = Number(raw)
@@ -30,14 +44,14 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
     setThemeError('')
     try {
       const theme = parseITermColors(await file.text(), file.name)
-      onChange({ customThemes: [...settings.customThemes, theme], themeId: theme.id })
+      patch({ customThemes: [...draft.customThemes, theme], themeId: theme.id })
     } catch (err) {
       setThemeError(err instanceof Error ? err.message : String(err))
     }
   }
 
   const exportCurrent = () => {
-    const theme = allThemes(settings.customThemes).find((t) => t.id === settings.themeId)
+    const theme = allThemes(draft.customThemes).find((t) => t.id === draft.themeId)
     if (theme && themeColorsForExport(theme)) downloadITermColors(theme)
   }
 
@@ -66,21 +80,21 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
               <Tabs.Content value="appearance">
                 <h3>{t('外观')}</h3>
                 <Row label={t('界面主题')}>
-                  <select value={settings.uiTheme} onChange={(e) => onChange({ uiTheme: e.target.value as Settings['uiTheme'] })}>
+                  <select value={draft.uiTheme} onChange={(e) => patch({ uiTheme: e.target.value as Settings['uiTheme'] })}>
                     <option value="system">{t('跟随系统')}</option>
                     <option value="light">{t('亮色')}</option>
                     <option value="dark">{t('暗色')}</option>
                   </select>
                 </Row>
                 <Row label={t('语言')}>
-                  <select value={settings.language} onChange={(e) => onChange({ language: e.target.value as Settings['language'] })}>
+                  <select value={draft.language} onChange={(e) => patch({ language: e.target.value as Settings['language'] })}>
                     <option value="auto">{t('跟随浏览器')}</option>
                     <option value="zh-CN">中文</option>
                     <option value="en-US">English</option>
                   </select>
                 </Row>
                 <Row label={t('标签栏')}>
-                  <select value={settings.tabStyle} onChange={(e) => onChange({ tabStyle: e.target.value })}>
+                  <select value={draft.tabStyle} onChange={(e) => patch({ tabStyle: e.target.value })}>
                     <option value="iterm2">{t('紧凑')}</option>
                     <option value="fnos">{t('宽松')}</option>
                   </select>
@@ -92,16 +106,16 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
                 <Row label={t('字体')}>
                   <input
                     className="text-input wide"
-                    value={settings.fontFamily}
-                    onChange={(e) => onChange({ fontFamily: e.target.value })}
+                    value={draft.fontFamily}
+                    onChange={(e) => patch({ fontFamily: e.target.value })}
                     spellCheck={false}
                   />
                 </Row>
                 <Row label={t('字号')}>
-                  <input type="number" min={8} max={48} value={settings.fontSize} onChange={(e) => onChange({ fontSize: intValue(e.target.value, settings.fontSize) })} />
+                  <input type="number" min={8} max={48} value={draft.fontSize} onChange={(e) => patch({ fontSize: intValue(e.target.value, draft.fontSize) })} />
                 </Row>
                 <Row label={t('字重')}>
-                  <select value={settings.fontWeight} onChange={(e) => onChange({ fontWeight: Number(e.target.value) })}>
+                  <select value={draft.fontWeight} onChange={(e) => patch({ fontWeight: Number(e.target.value) })}>
                     {[300, 400, 500, 600, 700].map((w) => (
                       <option key={w} value={w}>
                         {w}
@@ -110,44 +124,46 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
                   </select>
                 </Row>
                 <Row label={t('行高')}>
-                  <input type="number" min={0.8} max={3} step={0.1} value={settings.lineHeight} onChange={(e) => onChange({ lineHeight: Number(e.target.value) || settings.lineHeight })} />
+                  <input type="number" min={0.8} max={3} step={0.1} value={draft.lineHeight} onChange={(e) => patch({ lineHeight: Number(e.target.value) || draft.lineHeight })} />
                 </Row>
                 <Row label={t('字距')}>
-                  <input type="number" min={-5} max={10} value={settings.letterSpacing} onChange={(e) => onChange({ letterSpacing: intValue(e.target.value, settings.letterSpacing) })} />
+                  <input type="number" min={-5} max={10} value={draft.letterSpacing} onChange={(e) => patch({ letterSpacing: intValue(e.target.value, draft.letterSpacing) })} />
                 </Row>
                 <Row label={t('光标')}>
-                  <select value={settings.cursorStyle} onChange={(e) => onChange({ cursorStyle: e.target.value as Settings['cursorStyle'] })}>
+                  <select value={draft.cursorStyle} onChange={(e) => patch({ cursorStyle: e.target.value as Settings['cursorStyle'] })}>
                     <option value="block">{t('方块')}</option>
                     <option value="bar">{t('竖线')}</option>
                     <option value="underline">{t('下划线')}</option>
                   </select>
                 </Row>
                 <Row label={t('光标闪烁')}>
-                  <Switch.Root className="switch" checked={settings.cursorBlink} onCheckedChange={(v) => onChange({ cursorBlink: v })}>
+                  <Switch.Root className="switch" checked={draft.cursorBlink} onCheckedChange={(v) => patch({ cursorBlink: v })}>
                     <Switch.Thumb className="switch-thumb" />
                   </Switch.Root>
                 </Row>
                 <Row label={t('回滚行数')}>
-                  <input type="number" min={100} max={1000000} step={1000} value={settings.scrollback} onChange={(e) => onChange({ scrollback: intValue(e.target.value, settings.scrollback) })} />
+                  <input type="number" min={100} max={1000000} step={1000} value={draft.scrollback} onChange={(e) => patch({ scrollback: intValue(e.target.value, draft.scrollback) })} />
                 </Row>
                 <Row label={t('重连窗口')}>
-                  <input type="number" min={0} max={3600} value={settings.graceSeconds} onChange={(e) => onChange({ graceSeconds: intValue(e.target.value, settings.graceSeconds) })} />
+                  <input type="number" min={0} max={3600} value={draft.graceSeconds} onChange={(e) => patch({ graceSeconds: intValue(e.target.value, draft.graceSeconds) })} />
                 </Row>
-                <button className="secondary-button" onClick={() => onChange({ fontFamily: DEFAULT_FONT_FAMILY })}>
-                  {t('恢复默认字体栈')}
-                </button>
+                <div className="settings-actions">
+                  <button className="secondary-button" onClick={() => patch({ fontFamily: DEFAULT_FONT_FAMILY })}>
+                    {t('恢复默认字体栈')}
+                  </button>
+                </div>
               </Tabs.Content>
 
               <Tabs.Content value="colors">
                 <h3>{t('配色')}</h3>
                 <div className="theme-grid">
-                  {allThemes(settings.customThemes).map((theme) => {
+                  {allThemes(draft.customThemes).map((theme) => {
                     const c = theme.colors ?? theme.variants?.dark ?? theme.variants?.light
                     return (
                       <button
                         key={theme.id}
-                        className={`theme-card${settings.themeId === theme.id ? ' is-active' : ''}`}
-                        onClick={() => onChange({ themeId: theme.id })}
+                        className={`theme-card${draft.themeId === theme.id ? ' is-active' : ''}`}
+                        onClick={() => patch({ themeId: theme.id })}
                       >
                         <span className="theme-swatch" style={{ background: c?.background }}>
                           <span style={{ color: c?.foreground }}>Aa</span>
@@ -191,6 +207,17 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
               </Tabs.Content>
             </div>
           </Tabs.Root>
+          <footer className="settings-footer">
+            <Dialog.Close asChild>
+              <button className="secondary-button">{t('取消')}</button>
+            </Dialog.Close>
+            <button className="secondary-button" onClick={() => onChange(draft)}>
+              {t('应用')}
+            </button>
+            <button className="primary-button" onClick={save}>
+              {t('保存')}
+            </button>
+          </footer>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -330,7 +357,7 @@ curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contr
       <section className="help-section">
         <h4>Font &amp; Colors</h4>
         <p>The default font matches iTerm2: Monaco 12, weight 400, line height 1.0, ligatures off. macOS uses the system Monaco; other systems fall back through Menlo, SF Mono, DejaVu Sans Mono, then JetBrains Mono.</p>
-        <p>Built-in iTerm2-compatible presets plus Material Design Colors. Import or export <code>.itermcolors</code> files under Colors; imported palettes are stored in the app settings.</p>
+        <p>Built-in iTerm2-compatible presets plus Material Design Colors. Import or export <code>.itermcolors</code> files under Colors; imported palettes are stored in the app draft.</p>
       </section>
 
       <section className="help-section">
@@ -345,7 +372,7 @@ curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contr
           <li>Page won’t open: enter from the fnOS desktop, or check the gateway socket and reverse-proxy configuration.</li>
           <li>Black screen or rendering glitches: append <code>?nogl=1</code> to the URL to use the DOM renderer.</li>
           <li>Images not showing: make sure the terminal supports OSC 1337 and update to the latest version.</li>
-          <li>Session ended unexpectedly: the network drop may have exceeded the 15-second reconnect window; adjust it under Text settings.</li>
+          <li>Session ended unexpectedly: the network drop may have exceeded the 15-second reconnect window; adjust it under Text draft.</li>
         </ul>
       </section>
     </>
