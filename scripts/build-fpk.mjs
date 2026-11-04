@@ -63,7 +63,7 @@ async function main() {
     execFileSync(fnpack, ['build', '-d', '.'], { cwd: stage, stdio: 'inherit' })
     const produced = readdirSync(stage).find((f) => f.endsWith('.fpk'))
     if (!produced) throw new Error('fnpack did not produce an .fpk')
-    const dest = join(out, target.artifact)
+    const dest = join(out, `ofterm_${version.replace(/[^0-9A-Za-z._-]/g, '-')}_${target.fnos}.fpk`)
     renameSync(join(stage, produced), dest)
     console.log(`artifact ${dest} (${statSync(dest).size} bytes)`)
   }

@@ -40,7 +40,7 @@ jobs:
 
       - name: Build FPK (x86 + arm64)
         env:
-          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '0.1.5-dev' }}
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '0.1.6-dev' }}
           FNPACK: fnpack
         run: |
           export VERSION="${VERSION#v}"
@@ -60,7 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'release' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Release build' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Release 0.1.6-dev' }}
           prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
           make_latest: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || 'false' }}
           generate_release_notes: false

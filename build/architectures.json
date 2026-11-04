@@ -5,14 +5,12 @@
       "goarch": "amd64",
       "fnos": "x86",
       "fnpack_arch": "x86_64",
-      "artifact": "ofterm_x86.fpk",
       "runner": "ubuntu-latest"
     },
     {
       "goarch": "arm64",
       "fnos": "arm",
       "fnpack_arch": "arm64",
-      "artifact": "ofterm_arm.fpk",
       "runner": "ubuntu-24.04-arm"
     }
   ],
@@ -21,7 +19,6 @@
       "goarch": "loong64",
       "fnos": "loongarch",
       "fnpack_arch": "loong64",
-      "artifact": "ofterm_loong64.fpk",
       "runner": "ubuntu-latest",
       "note": "Enable when fnOS officially exposes a loongarch platform value."
     }

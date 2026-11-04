@@ -129,9 +129,9 @@ docs/                        架构、安全、隐私、兼容性文档
 
 ## 下载
 
-- **release 分支构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk
-- **release 分支构建（ARM）：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk
-- **稳定版：** 打 `v*` tag 后使用 `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_x86.fpk`（或 `ofterm_arm.fpk`）。
+- **release 分支构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.6-dev_x86.fpk
+- **release 分支构建（ARM）：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.6-dev_arm.fpk
+- **稳定版：** 打 `v*` tag 后使用 `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_0.1.6-dev_x86.fpk`（或 `ofterm_0.1.6-dev_arm.fpk`）。
 
 `fnpack.json` 指向稳定版；预发布构建使用显式的 `release` tag。
 
@@ -156,7 +156,7 @@ chmod +x /tmp/fnpack
 FNPACK=/tmp/fnpack VERSION=0.1.0 node scripts/build-fpk.mjs --all
 ```
 
-产物位于 `build/out/ofterm_x86.fpk` 与 `build/out/ofterm_arm.fpk`。
+产物位于 `build/out/ofterm_0.1.6-dev_x86.fpk` 与 `build/out/ofterm_0.1.6-dev_arm.fpk`。
 
 本地开发：
 
@@ -170,7 +170,7 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 - `.github/workflows/ci.yml`：在 `main`/`master`/PR 上运行前端测试与构建、后端 vet/测试和 Linux 交叉编译，不发布安装包。
 - `.github/workflows/release.yml`：在 `release` 分支和 `v*` tag 上构建。推送到 `release` 发布会滚动预发布（tag 为 `release`）；`v*` tag 发布稳定版。
-- 两个渠道都会附加 `ofterm_x86.fpk`、`ofterm_arm.fpk` 和 `SHA256SUMS`。
+- 两个渠道都会附加 `ofterm_0.1.6-dev_x86.fpk`、`ofterm_0.1.6-dev_arm.fpk` 和 `SHA256SUMS`。
 - `build/architectures.json` 是唯一的架构来源。新增 Go 支持的架构不需要修改后端。
 
 ## 安全与隐私
