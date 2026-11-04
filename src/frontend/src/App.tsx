@@ -351,6 +351,16 @@ function Workspace({ me }: { me: Me }) {
     return () => window.removeEventListener('keydown', onKeyDown, true)
   }, [activeClient, addTab, closeActivePane, settingsOpen, splitActive])
 
+  const installUtilities = useCallback(() => {
+    if (!activeClient) {
+      setToast({ message: '请先打开一个终端', kind: 'info' })
+      return
+    }
+    activeClient.runCommand('curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash')
+    setSettingsOpen(false)
+    setToast({ message: '已在终端中执行辅助工具安装', kind: 'success' })
+  }, [activeClient])
+
   const closeSearch = () => {
     setSearchOpen(false)
     activeClient?.clearSearch()
@@ -498,7 +508,7 @@ function Workspace({ me }: { me: Me }) {
         <span className="status-muted">OFTerm {me.version}</span>
       </footer>
 
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} onInstallUtilities={installUtilities} />
     </div>
   )
 }

@@ -12,9 +12,10 @@ interface Props {
   onOpenChange: (open: boolean) => void
   settings: Settings
   onChange: (patch: Partial<Settings>) => void
+  onInstallUtilities: () => void
 }
 
-export function SettingsDialog({ open, onOpenChange, settings, onChange }: Props) {
+export function SettingsDialog({ open, onOpenChange, settings, onChange, onInstallUtilities }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [themeError, setThemeError] = useState('')
   const intValue = (raw: string, fallback: number) => {
@@ -200,8 +201,13 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange }: Props
 
                 <section className="help-section">
                   <h4>图片与实用工具</h4>
-                  <p>支持 iTerm2 的 OSC 1337 内联图片协议、Sixel，以及 OSC 52 剪贴板、OSC 9 通知和文件下载。辅助脚本位于仓库 <code>contrib/</code>：</p>
-                  <pre className="help-code">curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | bash</pre>
+                  <p>支持 iTerm2 的 OSC 1337 内联图片协议、Sixel，以及 OSC 52 剪贴板、OSC 9 通知和文件下载。辅助脚本位于仓库 <code>contrib/</code>。</p>
+                  <div className="help-actions">
+                    <button className="primary-button" onClick={onInstallUtilities}>
+                      在当前终端安装辅助工具
+                    </button>
+                  </div>
+                  <pre className="help-code">curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash</pre>
                   <ul>
                     <li><code>imgcat</code> / <code>ofn-imgcat</code>：在终端内显示图片；<code>ofn-imgcat</code> 会按窗口尺寸缩图。</li>
                     <li><code>ofn-imgls</code>：带缩略图的目录列表。</li>

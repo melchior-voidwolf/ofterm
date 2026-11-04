@@ -507,6 +507,15 @@ export class SessionClient {
     this.terminal.clear()
   }
 
+  runCommand(command: string) {
+    if (this.status !== 'connected' || this.ws?.readyState !== WebSocket.OPEN) {
+      this.showError('终端尚未连接')
+      return
+    }
+    this.sendData(command + '\r')
+    this.focus()
+  }
+
   private showError(message: string) {
     this.terminal.writeln(`\r\n\x1b[31m[错误] ${message}\x1b[0m`)
   }
