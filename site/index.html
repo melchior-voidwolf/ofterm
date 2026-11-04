@@ -144,7 +144,7 @@
 
       <div class="feature-block">
         <h3 data-i18n="f-inline">终端内图片（imgcat / imgls）</h3>
-        <p data-i18n="f-inline-body">OFTerm 完整支持 OSC 1337 内联图片协议：<code>imgcat</code> 把图片直接画进终端，<code>imgls</code> 以缩略图网格浏览整个目录。看一张刚生成的截图、确认日志里的图表、浏览相册——都不用离开终端窗口。图片随终端输出流式传输，在 ssh 到远端的 shell 里同样可用。</p>
+        <p data-i18n="f-inline-body">OFTerm 完整支持 OSC 1337 内联图片协议：<code>imgcat</code> 把图片直接画进终端，<code>imgls</code> 以缩略图网格浏览整个目录。配套工具是自研的 Rust 原生实现——不依赖 ImageMagick，支持 PNG/JPEG/GIF/WebP/BMP/TIFF 等十余种格式，自动处理手机照片的 EXIF 方向，动画图原样保留，传输前按窗口尺寸缩图。安装包内置 Linux x86_64/aarch64/armv7 与 macOS x86_64/arm64 五个产物，SSH 到树莓派或 x64 服务器也能直接安装；不匹配时自动回退 shell 版本。</p>
         <img class="shot" src="img/5.png" alt="Inline images with imgls and imgcat">
       </div>
 
@@ -209,7 +209,7 @@
       'f-split': 'Split Panes & Tabs',
       'f-split-body': 'Slice a tab into as many panes as you like, vertically and horizontally. Each pane is an independent session with split and close controls in the corner, and draggable dividers. Inactive panes are slightly dimmed so the active one is obvious.',
       'f-inline': 'Inline Images (imgcat / imgls)',
-      'f-inline-body': 'OFTerm fully supports the OSC 1337 inline image protocol: imgcat draws images right in the terminal, and imgls browses a whole directory as a thumbnail grid. Check a freshly generated screenshot, glance at a chart in a log, browse a photo folder — all without leaving the terminal. Images stream with the terminal output, so they work inside remote shells over ssh too.',
+      'f-inline-body': 'OFTerm fully supports the OSC 1337 inline image protocol: imgcat draws images right in the terminal, and imgls browses a whole directory as a thumbnail grid. The helpers are a self-developed Rust implementation — no ImageMagick required, a dozen formats including PNG/JPEG/GIF/WebP/BMP/TIFF, automatic EXIF orientation for phone photos, animations preserved, and downscaling to the window before transfer. Every package bundles five binaries (Linux x86_64/aarch64/armv7, macOS x86_64/arm64), so installing inside an SSH session to a Raspberry Pi or an x64 server just works; anything unmatched falls back to the shell version.',
       'f-titles': 'Tab Titles Follow the Foreground Job',
       'f-titles-body': 'A tab is no longer called “Shell” forever — it shows what is actually running: vim while you edit, ssh while you are away, htop while you watch. Shell-integration (OSC) titles are honored too; the freshest title always wins.',
       'f-colors': 'Classic Color Presets',

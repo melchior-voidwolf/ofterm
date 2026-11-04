@@ -58,7 +58,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 ### 辅助脚本
 
-`contrib/` 提供与 iTerm2 Utilities 兼容的工具集：
+`contrib/` 提供与 iTerm2 Utilities 兼容的工具集。`imgcat`/`imgls` 由自研 Rust 二进制（`utilities/`）提供：不依赖 ImageMagick/sips，自动处理 EXIF 方向，动画图片原样保留，并在传输前按终端尺寸缩图。每个安装包都内置五个预编译产物——Linux x86_64/aarch64/armv7 与 macOS x86_64/arm64——因此即使是在 SSH 到另一台机器的会话里安装也能选到匹配版本；不匹配时自动回退到 shell 实现。
 
 | 命令 | 用途 |
 |---|---|

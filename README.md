@@ -60,7 +60,7 @@ OFTerm is built around three constraints:
 
 ### Utilities
 
-`contrib/` contains an iTerm2-compatible utility set:
+`contrib/` contains an iTerm2-compatible utility set. `imgcat`/`imgls` ship as a self-developed Rust binary (`utilities/`): no ImageMagick or sips needed, EXIF orientation handled, animated images preserved, and downscaling happens before transfer. Five prebuilt binaries — Linux x86_64/aarch64/armv7 and macOS x86_64/arm64 — are bundled in every package, so the installer works even inside an SSH session to another machine; anything unmatched falls back to the shell scripts.
 
 | Command | Purpose |
 |---|---|

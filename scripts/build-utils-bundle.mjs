@@ -5,14 +5,16 @@ import { fileURLToPath } from 'node:url'
 
 // Build the utilities archive that the app installs into the user's shell.
 //
-// Contents: the shell helpers plus the native binary for the architecture
-// being packaged. The installer picks the matching binary, runs `--selftest`,
-// and falls back to the shell scripts when it cannot execute (other OS, exotic
-// CPU, a remote SSH host, ...).
+// Contents: the shell helpers plus the native binary for every supported
+// platform. The installer picks the matching binary, runs `--selftest`, and
+// falls back to the shell scripts when it cannot execute. Everything ships in
+// every package because the install runs in whatever shell the user has open —
+// often an SSH session on a different machine (Raspberry Pi, x86 server, Mac).
 //
 // Usage: node scripts/build-utils-bundle.mjs [arch ...]
-//   arch ∈ x86, arm (fnOS names), or the full binary suffix such as
-//   linux-x86_64 / linux-aarch64 / linux-armv7. Default: all Linux arches.
+//   arch ∈ x86, arm (fnOS names), or a full suffix such as linux-x86_64,
+//   linux-aarch64, linux-armv7, linux-armv6, darwin-x86_64, darwin-arm64.
+//   Default: everything available under build/utils.
 //
 // Binaries are produced by scripts/build-utils.mjs; run that first.
 
@@ -31,9 +33,11 @@ const aliases = {
   all: null,
 }
 
+const defaults = ['linux-x86_64', 'linux-aarch64', 'linux-armv7', 'darwin-x86_64', 'darwin-arm64']
+
 const requested = process.argv.slice(2)
 const wanted = requested.flatMap((arg) => {
-  if (arg === 'all') return ['linux-x86_64', 'linux-aarch64', 'linux-armv7']
+  if (arg === 'all') return defaults
   const resolved = aliases[arg] ?? (arg.startsWith('linux-') || arg.startsWith('darwin-') ? arg : null)
   if (!resolved) {
     console.error(`unknown architecture: ${arg}`)
@@ -41,9 +45,7 @@ const wanted = requested.flatMap((arg) => {
   }
   return [resolved]
 })
-const binaries = wanted.length
-  ? [...new Set(wanted)].map((name) => `ofterm-utils-${name}`)
-  : ['ofterm-utils-linux-x86_64', 'ofterm-utils-linux-aarch64', 'ofterm-utils-linux-armv7']
+const binaries = (wanted.length ? [...new Set(wanted)] : defaults).map((name) => `ofterm-utils-${name}`)
 
 const binDir = join(root, 'build/utils')
 const staging = mkdtempSync(join(root, 'build/utils-bundle-'))

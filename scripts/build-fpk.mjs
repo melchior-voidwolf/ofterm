@@ -48,10 +48,11 @@ async function main() {
 
     const bin = join(stage, 'app/ofterm')
     mkdirSync(dirname(bin), { recursive: true })
-    // Embed only this package's native utilities binary, then rebuild the
-    // frontend so the archive carries the matching file.
-    console.log(`utilities bundle for ${target.fnos}`)
-    execFileSync('node', [join(root, 'scripts/build-utils-bundle.mjs'), target.fnos], { stdio: 'inherit' })
+    // Every package carries every architecture's utilities binary: the install
+    // runs in whatever shell the user has open, including SSH sessions on
+    // other machines (Raspberry Pi, x86 server, Mac).
+    console.log('utilities bundle (all platforms)')
+    execFileSync('node', [join(root, 'scripts/build-utils-bundle.mjs'), 'all'], { stdio: 'inherit' })
     execFileSync('npm', ['run', 'build'], { cwd: join(root, 'src/frontend'), stdio: 'inherit' })
     console.log(`build ${target.goarch} -> ${bin}`)
     execFileSync('go', ['build', '-trimpath', '-ldflags', `-s -w -X main.version=${version}`, '-o', bin, './cmd/ofterm'], {
