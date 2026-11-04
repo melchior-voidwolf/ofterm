@@ -25,8 +25,8 @@ PREFIX=/usr/local/bin FORCE=1 \
 
 | 命令 | 作用 | 协议 |
 |---|---|---|
-| `imgcat` / `ofn-imgcat` | 在终端内显示图片 | OSC 1337 File / MultipartFile |
-| `imgls` / `ofn-imgls` | 带缩略图的目录列表 | OSC 1337 |
+| `imgcat` | 在终端内显示图片（自动缩图） | OSC 1337 File / MultipartFile |
+| `imgls` | 带缩略图与像素尺寸的目录列表 | OSC 1337 |
 | `ofn-copy` | 复制文本到浏览器剪贴板 | OSC 52 |
 | `ofn-notify` | 显示桌面通知 | OSC 9 |
 | `ofn-dl` | 从 NAS/远程主机下载文件到浏览器 | OSC 1337 File=inline=0 |
@@ -35,9 +35,10 @@ PREFIX=/usr/local/bin FORCE=1 \
 
 ## 尺寸与性能
 
-- `ofn-imgcat` 默认按当前终端尺寸缩图（取 `stty size`，约 10×20px/单元格，最长边上限 1600px），避免把 4000×3000 原图整包 base64 传给浏览器。
-- `ofn-imgls` 默认按 20×10 单元格生成缩略图，最长边约 280px；实测同一目录从 72KB 降到 21KB。
-- 需要原图时设置 `OFN_IMG_MAX_PX=0` 或直接使用 `imgcat`。
+- `imgcat` 默认按当前终端尺寸缩图（取 `stty size`，约 10×20px/单元格，最长边上限 1600px），避免把 4000×3000 原图整包 base64 传给浏览器。可用 `--no-shrink` 或 `OFN_IMG_MAX_PX=0` 关闭。
+- `imgls` 默认按 20×10 单元格生成缩略图，最长边约 280px，并在文件名后显示像素尺寸（`--no-dimensions` 关闭）。实测同一目录从 72KB 降到 21KB。
+- 缩图依赖 `sips`（macOS）或 `magick`/`convert`（ImageMagick）；两者都没有时发送原始字节，功能不受影响。
+- 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 - 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 
 ## 示例
@@ -54,7 +55,7 @@ ofn-title "prod-01"
 
 ## 兼容性说明
 
-- `imgcat` / `imgls` 来自 iTerm2（GPL-2.0），未修改；OFTerm 前端使用 MIT 的 `@xterm/addon-image` 渲染。
+- `imgcat` 基于 iTerm2 的 `imgcat`（GPL-2.0）修改：增加了传输前缩图与 `--no-shrink`；`imgls` 是 OFTerm 独立实现（GPL-2.0），命令行与其兼容并增加了 `--dimensions`。OFTerm 前端使用 MIT 的 `@xterm/addon-image` 渲染。
 - iTerm2 新版 `imgcat` 默认使用 `MultipartFile` 分块协议；OFTerm 前端会拼装后再交给 image addon，因此无需 `-l`。
 - 在 tmux/screen 内运行时，`imgcat` 会自动加 tmux DCS 包装；OFTerm 按终端实际支持处理。
 - 其他终端若不支持 OSC 1337，图片不会显示，但不会破坏终端会话。

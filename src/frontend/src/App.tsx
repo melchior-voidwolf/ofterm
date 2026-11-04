@@ -387,7 +387,7 @@ function Workspace({ me }: { me: Me }) {
       'd="$HOME/.local/bin"; mkdir -p "$d"; f="$(mktemp)"',
       ...chunks.map((chunk) => `printf '%s' '${chunk}' >> "$f"`),
       'if command -v openssl >/dev/null 2>&1; then openssl base64 -d -A < "$f" | tar -xzf - -C "$d"; else base64 -d < "$f" | tar -xzf - -C "$d"; fi',
-      'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-imgcat "$d"/ofn-imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
+      'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
       'rm -f "$f"',
       'if [ -x "$d/ofn-check" ]; then',
       '  export PATH="$d:$PATH"',

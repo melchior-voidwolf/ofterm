@@ -8,8 +8,6 @@ const root = resolve(here, '..')
 const files = [
   'imgcat',
   'imgls',
-  'ofn-imgcat',
-  'ofn-imgls',
   'ofn-copy',
   'ofn-notify',
   'ofn-dl',

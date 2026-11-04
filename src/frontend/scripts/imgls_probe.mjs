@@ -13,7 +13,7 @@ if (await pw.count()) {
 }
 await page.waitForTimeout(1200)
 await page.locator('.xterm-screen').click()
-await page.keyboard.type('/Users/kail/fntermx/contrib/ofn-imgls --width 20 --height 10 /tmp/ofn-imgtest')
+await page.keyboard.type('/Users/kail/fntermx/contrib/imgls --width 20 --height 10 /tmp/ofn-imgtest')
 await page.keyboard.press('Enter')
 await page.waitForTimeout(2500)
 const info = await page.evaluate(() => ({

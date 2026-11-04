@@ -98,7 +98,7 @@ await page.waitForTimeout(800)
 await page.getByRole('button', { name: /关闭 pane/ }).nth(1).click()
 await page.waitForTimeout(1000)
 await run(0, 'cd /tmp/ofterm-imgdemo; clear', 600)
-await run(0, '/tmp/ofterm-utils/ofn-imgls', 2600)
+await run(0, '/tmp/ofterm-utils/imgls', 2600)
 await shot('05-imgls')
 
 // 04 — light theme workspace.

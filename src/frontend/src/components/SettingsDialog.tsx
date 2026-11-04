@@ -276,8 +276,8 @@ function HelpZh({ onInstallUtilities }: { onInstallUtilities: () => void }) {
         <pre className="help-code"># 手动安装（可选，需能访问 GitHub）
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash</pre>
         <ul>
-          <li><code>imgcat</code> / <code>ofn-imgcat</code>：在终端内显示图片；<code>ofn-imgcat</code> 会按窗口尺寸缩图。</li>
-          <li><code>ofn-imgls</code>：带缩略图的目录列表。</li>
+          <li><code>imgcat</code>：在终端内显示图片，默认按窗口尺寸缩图（<code>--no-shrink</code> 发送原图）。</li>
+          <li><code>imgls</code>：带缩略图与像素尺寸的目录列表。</li>
           <li><code>ofn-copy</code>、<code>ofn-notify</code>、<code>ofn-dl</code>、<code>ofn-title</code>：剪贴板、通知、下载与标题。</li>
         </ul>
       </section>
@@ -348,8 +348,8 @@ function HelpEn({ onInstallUtilities }: { onInstallUtilities: () => void }) {
         <pre className="help-code"># Manual install (optional, requires GitHub access)
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash</pre>
         <ul>
-          <li><code>imgcat</code> / <code>ofn-imgcat</code>: display images in the terminal; <code>ofn-imgcat</code> downscales to fit the window.</li>
-          <li><code>ofn-imgls</code>: directory listing with thumbnails.</li>
+          <li><code>imgcat</code>: display images in the terminal; downscales to fit the window by default (<code>--no-shrink</code> sends the original).</li>
+          <li><code>imgls</code>: directory listing with thumbnails and pixel dimensions.</li>
           <li><code>ofn-copy</code>, <code>ofn-notify</code>, <code>ofn-dl</code>, <code>ofn-title</code>: clipboard, notification, download, and title.</li>
         </ul>
       </section>

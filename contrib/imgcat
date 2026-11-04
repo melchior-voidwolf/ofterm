@@ -2,6 +2,16 @@
 
 set -o pipefail
 
+# imgcat: display images inline using the OSC 1337 Inline Images Protocol.
+#
+# Based on iTerm2's imgcat (GPL-2.0, https://github.com/gnachman/iTerm2,
+# OtherResources/Utilities/imgcat), modified by the OFTerm project:
+# large images are downscaled to fit the terminal before transfer (disable
+# with --no-shrink or OFN_IMG_MAX_PX=0), so multi-megabyte photos do not stall
+# the session. Everything else — URLs, stdin, size in cells/px/percent, type
+# hints, tmux wrapping, multipart transfer — behaves like upstream.
+# This file remains under GPL-2.0.
+
 # tmux requires unrecognized OSC sequences to be wrapped with DCS tmux;
 # <sequence> ST, and for all ESCs in <sequence> to be replaced with ESC ESC. It
 # only accepts ESC backslash for ST. We use TERM instead of TMUX because TERM
@@ -52,6 +62,78 @@ function b64_decode() {
         BASE64ARG=-d
     fi
     base64 $BASE64ARG
+}
+
+shrink_temps=()
+function cleanup_shrink_temps() {
+    if [ ${#shrink_temps[@]} -gt 0 ]; then
+        rm -f "${shrink_temps[@]}"
+    fi
+}
+trap cleanup_shrink_temps EXIT
+
+# Decide how large an image may be before we downscale it for transfer.
+function default_max_px() {
+    if [ -n "${OFN_IMG_MAX_PX+x}" ]; then
+        echo "$OFN_IMG_MAX_PX"
+        return
+    fi
+    # Fit the current terminal window by default (assume ~10x20 px cells).
+    local size rows cols w h m
+    size="$(stty size 2>/dev/null || echo '24 80')"
+    rows="${size%% *}"
+    cols="${size##* }"
+    w=$((cols * 10))
+    h=$((rows * 20))
+    if [ "$w" -gt "$h" ]; then m=$w; else m=$h; fi
+    [ "$m" -gt 1600 ] && m=1600
+    [ "$m" -lt 320 ] && m=320
+    echo "$m"
+}
+
+# shrink_image filename -> sets shrink_result to the path to use (a downscaled
+# temp copy when worthwhile, otherwise the original). Temp copies are removed
+# on exit. Must be called in the main shell so the cleanup list is visible to
+# the EXIT trap (a command substitution would run it in a subshell).
+function shrink_image() {
+    local f="$1" ext tmp base resize
+    shrink_result="$f"
+    if [ "$max_px" = "0" ]; then
+        return
+    fi
+    case "${f##*.}" in
+        png | PNG | jpg | JPG | jpeg | JPEG | tif | TIF | tiff | TIFF | bmp | BMP | gif | GIF | webp | WEBP) ;;
+        *)
+            return
+            ;;
+    esac
+    ext="${f##*.}"
+    if builtin command -V sips >/dev/null 2>&1; then
+        resize=sips
+    elif builtin command -V magick >/dev/null 2>&1; then
+        resize=magick
+    elif builtin command -V convert >/dev/null 2>&1; then
+        resize=convert
+    else
+        return
+    fi
+    # mktemp needs the template to end in X's, but we want to keep the
+    # extension (ImageMagick/sips pick the output format from it), so create
+    # the file, drop it, and reuse its unique name with the suffix appended.
+    base="$(mktemp "${TMPDIR:-/tmp}/ofn-img.XXXXXX")" || return
+    rm -f "$base"
+    tmp="${base}.${ext}"
+    case "$resize" in
+        sips) sips -Z "$max_px" "$f" --out "$tmp" >/dev/null 2>&1 || cp "$f" "$tmp" ;;
+        magick) magick "$f" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$f" "$tmp" ;;
+        convert) convert "$f" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$f" "$tmp" ;;
+    esac
+    # Keep the original if downscaling somehow made it bigger.
+    if [ -f "$tmp" ] && [ "$(wc -c <"$tmp")" -ge "$(wc -c <"$f")" ]; then
+        cp "$f" "$tmp"
+    fi
+    shrink_temps+=("$tmp")
+    shrink_result="$tmp"
 }
 
 # print_image filename inline base64contents print_filename width height preserve_aspect_ratio
@@ -117,10 +199,11 @@ function errcho() {
 
 function show_help() {
     errcho
-    errcho "Usage: imgcat [-p] [-n] [-W width] [-H height] [-r] [-s] [-u] [-t file-type] [-f] filename ..."
+    errcho "Usage: imgcat [-p] [-n] [-W width] [-H height] [-r] [-s] [-u] [-t file-type] [-f] [--no-shrink] filename ..."
     errcho "       cat filename | imgcat [-W width] [-H height] [-r] [-s]"
     errcho
-    errcho "Display images inline in the iTerm2 using Inline Images Protocol"
+    errcho "Display images inline using the OSC 1337 Inline Images Protocol."
+    errcho "Large images are downscaled to fit the terminal before transfer."
     errcho
     errcho "Options:"
     errcho
@@ -135,6 +218,10 @@ function show_help() {
     errcho "    -W, --width N                   Set image width to N character cells, pixels or percent (see below)"
     errcho "    -H, --height N                  Set image height to N character cells, pixels or percent (see below)"
     errcho "    -l, --legacy                    Use legacy protocol that sends the whole image in a single control sequence"
+    errcho "        --no-shrink                 Send the original bytes; no downscaling before transfer"
+    errcho
+    errcho "    Downscaling needs sips, magick or convert. OFN_IMG_MAX_PX overrides the pixel"
+    errcho "    budget; OFN_IMG_MAX_PX=0 is the same as --no-shrink."
     errcho
     errcho "    If you don't specify width or height an appropriate value will be chosen automatically."
     errcho "    The width and height are given as word 'auto' or number N followed by a unit:"
@@ -146,7 +233,7 @@ function show_help() {
     errcho "    If a type is provided, it is used as a hint to disambiguate."
     errcho "    The file type can be a mime type like text/markdown, a language name like Java, or a file extension like .c"
     errcho "    The file type can usually be inferred from the extension or its contents. -t is most useful when"
-    errcho "    a filename is not available, such as whe input comes from a pipe."
+    errcho "    a filename is not available, such as when input comes from a pipe."
     errcho
     errcho "Examples:"
     errcho
@@ -155,6 +242,7 @@ function show_help() {
     errcho "    $ imgcat -p -W 500px -u http://host.tld/path/to/image.jpg -W 80 -f image.png"
     errcho "    $ cat url_list.txt | xargs imgcat -p -W 40 -u"
     errcho "    $ imgcat -t application/json config.json"
+    errcho "    $ imgcat --no-shrink original-quality.png"
     errcho
 }
 
@@ -192,6 +280,7 @@ check_dependency base64
 check_dependency wc
 file_type=""
 legacy=0
+max_px="$(default_max_px)"
 
 # Look for command line flags.
 while [ $# -gt 0 ]; do
@@ -225,6 +314,9 @@ while [ $# -gt 0 ]; do
     -l | --l | --legacy)
         legacy=1
         ;;
+    --no-shrink)
+        max_px=0
+        ;;
     -f | --f | --file)
         has_stdin=f
         is_url=f
@@ -235,9 +327,9 @@ while [ $# -gt 0 ]; do
         is_url=t
         ;;
     -t | --t | --type)
-         file_type="$2"
-         shift
-         ;;
+        file_type="$2"
+        shift
+        ;;
     -*)
         error "Unknown option flag: $1"
         show_help
@@ -250,7 +342,8 @@ while [ $# -gt 0 ]; do
                 exit 2
             }
         elif [ -r "$1" ]; then
-            encoded_image=$(cat "$1" | b64_encode)
+            shrink_image "$1"
+            encoded_image=$(cat "$shrink_result" | b64_encode)
         else
             error "imgcat: $1: No such file or directory"
             exit 2

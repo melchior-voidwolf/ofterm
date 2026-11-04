@@ -20,7 +20,7 @@ license texts live in `licenses/`; the CI license gate is not implemented yet.
 | Vite | pinned in package-lock.json | MIT | Build tooling (not shipped) |
 | @xterm/xterm and addons | pinned in package-lock.json | MIT | Terminal emulator |
 | JetBrains Mono | @fontsource/jetbrains-mono | OFL-1.1 | Bundled monospace fallback |
-| iTerm2 imgcat/imgls | vendored | GPL-2.0 | Inline image helper scripts (contrib/) |
+| iTerm2 imgcat | derived | GPL-2.0 | Inline image helper (contrib/imgcat), modified to downscale before transfer |
 
 ## Theme and color data
 
@@ -33,7 +33,7 @@ license texts live in `licenses/`; the CI license gate is not implemented yet.
 ## Policy
 
 - The project itself is GPL-2.0-only; third-party runtime dependencies must be GPLv2-compatible (MIT/BSD/ISC/OFL).
-- `contrib/imgcat` and `contrib/imgls` are vendored from iTerm2 (GPLv2) to provide the documented iTerm2 inline-image workflow.
+- `contrib/imgcat` is derived from iTerm2's imgcat (GPLv2), modified to downscale before transfer; `contrib/imgls` is an independent OFTerm implementation with an iTerm2-compatible command line.
 - No FntermX code, binaries, icons, screenshots, or other assets are reused.
 - Dependency licenses are restricted to the allowlist: GPL-2.0-only, MIT,
   BSD-2-Clause, BSD-3-Clause, ISC, OFL-1.1. The automated CI license gate is

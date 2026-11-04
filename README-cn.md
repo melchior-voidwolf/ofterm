@@ -62,8 +62,8 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 | 命令 | 用途 |
 |---|---|
-| `imgcat`、`imgls` | 来自 iTerm2（GPL-2.0），未修改 |
-| `ofn-imgcat`、`ofn-imgls` | 按终端尺寸缩图后再传输 |
+| `imgcat` | 基于 iTerm2 的 imgcat（GPL-2.0）修改；传输前按终端尺寸缩图 |
+| `imgls` | OFTerm 实现（GPL-2.0）：缩略图 + 像素尺寸 |
 | `ofn-copy` | OSC 52 剪贴板 |
 | `ofn-notify` | OSC 9 通知 |
 | `ofn-dl` | 从 Shell 下载文件到浏览器 |

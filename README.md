@@ -64,8 +64,8 @@ OFTerm is built around three constraints:
 
 | Command | Purpose |
 |---|---|
-| `imgcat`, `imgls` | Vendored from iTerm2 (GPL-2.0), unmodified |
-| `ofn-imgcat`, `ofn-imgls` | Size-aware wrappers that downscale before transfer |
+| `imgcat` | Derived from iTerm2's imgcat (GPL-2.0); downscales before transfer |
+| `imgls` | OFTerm implementation (GPL-2.0): thumbnails plus pixel dimensions |
 | `ofn-copy` | OSC 52 clipboard |
 | `ofn-notify` | OSC 9 notification |
 | `ofn-dl` | Download a file from the shell to the browser |

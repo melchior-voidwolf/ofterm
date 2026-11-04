@@ -8,13 +8,14 @@
 #   OFTERM_UTILS_URL=...    alternate raw base URL
 #   FORCE=1                     overwrite existing files
 #
-# The imgcat/imgls scripts are vendored from iTerm2 (GPL-2.0); the ofn-* helpers
-# are part of OFTerm (GPL-2.0). Review scripts before piping curl to bash.
+# imgcat and imgls are derived from iTerm2 (GPL-2.0) and extended by the
+# OFTerm project; the ofn-* helpers are part of OFTerm. Review scripts before
+# piping curl to bash.
 set -euo pipefail
 
 BASE="${OFTERM_UTILS_URL:-https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib}"
 PREFIX="${PREFIX:-$HOME/.local/bin}"
-FILES="imgcat imgls ofn-imgcat ofn-imgls ofn-copy ofn-notify ofn-dl ofn-title ofn-check"
+FILES="imgcat imgls ofn-copy ofn-notify ofn-dl ofn-title ofn-check"
 
 mkdir -p "$PREFIX"
 tmp="$(mktemp -d)"
