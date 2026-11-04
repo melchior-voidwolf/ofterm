@@ -65,6 +65,5 @@ jobs:
           make_latest: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || 'false' }}
           generate_release_notes: false
           files: |
-            build/out/ofterm_x86.fpk
-            build/out/ofterm_arm.fpk
+            build/out/*.fpk
             build/out/SHA256SUMS
