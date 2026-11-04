@@ -12,6 +12,7 @@ import {
   setSplitRatio,
   splitPane,
   type PaneNode,
+  type Rect,
 } from './session/panes'
 import type { SessionClient, SessionStatus } from './session/SessionClient'
 import { blendHex, themeColors } from './theme'
@@ -548,20 +549,49 @@ interface TabPanesProps {
   onRatio: (tabId: string, splitId: string, ratio: number) => void
 }
 
+// Percentage pane offsets land pane edges on fractional pixels (50% of an
+// odd-width layer = x.5px), which resamples the terminal canvas and blurs the
+// glyphs inside it. Snap the layout to whole CSS pixels instead.
+function snappedRect(rect: Rect, size: { w: number; h: number }) {
+  const left = Math.round(rect.x * size.w)
+  const top = Math.round(rect.y * size.h)
+  return {
+    left,
+    top,
+    width: Math.round((rect.x + rect.w) * size.w) - left,
+    height: Math.round((rect.y + rect.h) * size.h) - top,
+  }
+}
+
 function TabPanes({ tab, active, settings, mode, onClient, onStatus, onSize, onActivate, onSplit, onClosePane, onRatio }: TabPanesProps) {
+  const layerRef = useRef<HTMLDivElement>(null)
+  const [layerSize, setLayerSize] = useState<{ w: number; h: number } | null>(null)
+  useEffect(() => {
+    const el = layerRef.current
+    if (!el) return
+    const update = () => setLayerSize({ w: el.clientWidth, h: el.clientHeight })
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
   const { panes, dividers } = layoutPanes(tab.root)
   return (
-    <div className="pane-layer">
+    <div className="pane-layer" ref={layerRef}>
       {panes.map(({ pane, rect }) => (
         <div
           key={pane.id}
           className="pane-slot"
-          style={{
-            left: `${rect.x * 100}%`,
-            top: `${rect.y * 100}%`,
-            width: `${rect.w * 100}%`,
-            height: `${rect.h * 100}%`,
-          }}
+          style={
+            layerSize
+              ? snappedRect(rect, layerSize)
+              : {
+                  left: `${rect.x * 100}%`,
+                  top: `${rect.y * 100}%`,
+                  width: `${rect.w * 100}%`,
+                  height: `${rect.h * 100}%`,
+                }
+          }
         >
           <TerminalView
             paneId={pane.id}
@@ -585,6 +615,7 @@ function TabPanes({ tab, active, settings, mode, onClient, onStatus, onSize, onA
           direction={divider.direction}
           rect={divider.rect}
           ratio={divider.ratio}
+          size={layerSize}
           onRatio={(ratio) => onRatio(tab.id, divider.splitId, ratio)}
         />
       ))}
@@ -596,17 +627,24 @@ function Splitter({
   direction,
   rect,
   ratio,
+  size,
   onRatio,
 }: {
   direction: 'row' | 'column'
-  rect: { x: number; y: number; w: number; h: number }
+  rect: Rect
   ratio: number
+  size: { w: number; h: number } | null
   onRatio: (ratio: number) => void
 }) {
-  const style =
+  const snapped = size ? snappedRect(rect, size) : null
+  const style: CSSProperties =
     direction === 'row'
-      ? { left: `calc(${rect.x * 100}% - 2px)`, top: `${rect.y * 100}%`, width: 4, height: `${rect.h * 100}%` }
-      : { left: `${rect.x * 100}%`, top: `calc(${rect.y * 100}% - 2px)`, width: `${rect.w * 100}%`, height: 4 }
+      ? snapped
+        ? { left: snapped.left - 2, top: snapped.top, width: 4, height: snapped.height }
+        : { left: `calc(${rect.x * 100}% - 2px)`, top: `${rect.y * 100}%`, width: 4, height: `${rect.h * 100}%` }
+      : snapped
+        ? { left: snapped.left, top: snapped.top - 2, width: snapped.width, height: 4 }
+        : { left: `${rect.x * 100}%`, top: `calc(${rect.y * 100}% - 2px)`, width: `${rect.w * 100}%`, height: 4 }
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault()
