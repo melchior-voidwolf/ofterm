@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
-import { Columns2, CornerDownLeft, Plus, Rows2, Search, Settings as SettingsIcon, Terminal, X } from 'lucide-react'
+import { Columns2, CornerDownLeft, Languages, Plus, Rows2, Search, Settings as SettingsIcon, Terminal, X } from 'lucide-react'
 import { api } from './lib/api'
 import { SettingsDialog } from './components/SettingsDialog'
 import { TerminalView } from './components/TerminalView'
@@ -407,6 +407,11 @@ function Workspace({ me }: { me: Me }) {
     setToast({ message: t('辅助工具安装已启动'), kind: 'success' })
   }, [activeClient])
 
+  const toggleLanguage = useCallback(() => {
+    const next = resolveLocale(settings.language) === 'zh-CN' ? 'en-US' : 'zh-CN'
+    updateSettings({ language: next })
+  }, [settings.language, updateSettings])
+
   const closeSearch = () => {
     setSearchOpen(false)
     activeClient?.clearSearch()
@@ -466,6 +471,15 @@ function Workspace({ me }: { me: Me }) {
           </button>
         </div>
         <div className="tabbar-actions">
+          <button
+            className="toolbar-button lang-toggle"
+            title={t('切换语言')}
+            aria-label={t('切换语言')}
+            onClick={toggleLanguage}
+          >
+            <Languages size={15} />
+            <span className="lang-indicator">{resolveLocale(settings.language) === 'zh-CN' ? '中' : 'EN'}</span>
+          </button>
           <button
             className="toolbar-button"
             title={t('搜索 (⌘⇧F)')}

@@ -35,6 +35,7 @@ const enUS: Record<string, string> = {
   搜索: 'Search',
   '搜索 (⌘⇧F)': 'Search (⌘⇧F)',
   设置: 'Settings',
+  切换语言: 'Switch language',
   上一个: 'Previous',
   关闭: 'Close',
   保存: 'Save',
