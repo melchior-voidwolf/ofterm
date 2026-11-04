@@ -1,0 +1,13 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=common
+source "${SCRIPT_DIR}/common"
+
+log_msg "uninstall_callback"
+if [ "${wizard_delete_data}" = "true" ]; then
+    log_msg "Deleting application data"
+    rm -rf "${TRIM_PKGVAR}" 2>/dev/null || true
+else
+    log_msg "Keeping application data"
+fi
+exit 0

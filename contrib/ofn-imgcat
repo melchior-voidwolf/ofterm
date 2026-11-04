@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# OFTerm image helper: downscale before sending, then use iTerm2 imgcat -l
+# (one legacy OSC 1337 sequence, fewer parser events than MultipartFile).
+set -euo pipefail
+
+here="$(cd "$(dirname "$0")" && pwd)"
+if [ -n "${OFN_IMG_MAX_PX+x}" ]; then
+  max_px="$OFN_IMG_MAX_PX"
+else
+  # Fit the current terminal window by default (assume ~10x20 px cells).
+  size="$(stty size 2>/dev/null || echo '24 80')"
+  rows="${size%% *}"
+  cols="${size##* }"
+  w=$((cols * 10))
+  h=$((rows * 20))
+  if [ "$w" -gt "$h" ]; then max_px=$w; else max_px=$h; fi
+  [ "$max_px" -gt 1600 ] && max_px=1600
+  [ "$max_px" -lt 320 ] && max_px=320
+fi
+args=("$@")
+last=""
+if [ "${#args[@]}" -gt 0 ]; then last="${args[${#args[@]}-1]}"; fi
+
+can_shrink=0
+tmp=""
+if [ -f "$last" ]; then
+  case "${last##*.}" in
+    png|PNG|jpg|JPG|jpeg|JPEG|tif|TIF|tiff|TIFF|bmp|BMP|gif|GIF|webp|WEBP) can_shrink=1 ;;
+  esac
+fi
+
+if [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v sips >/dev/null 2>&1; then
+  tmp="$(mktemp -t ofn-img).${last##*.}"
+  trap 'rm -f "$tmp"' EXIT
+  sips -Z "$max_px" "$last" --out "$tmp" >/dev/null 2>&1 || cp "$last" "$tmp"
+  args[${#args[@]}-1]="$tmp"
+elif [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v magick >/dev/null 2>&1; then
+  tmp="$(mktemp -t ofn-img).${last##*.}"
+  trap 'rm -f "$tmp"' EXIT
+  magick "$last" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$last" "$tmp"
+  args[${#args[@]}-1]="$tmp"
+elif [ "$max_px" != "0" ] && [ "$can_shrink" = "1" ] && command -v convert >/dev/null 2>&1; then
+  tmp="$(mktemp -t ofn-img).${last##*.}"
+  trap 'rm -f "$tmp"' EXIT
+  convert "$last" -resize "${max_px}x${max_px}>" "$tmp" 2>/dev/null || cp "$last" "$tmp"
+  args[${#args[@]}-1]="$tmp"
+fi
+
+if [ -n "$tmp" ] && [ -f "$tmp" ] && [ "$(wc -c < "$tmp")" -ge "$(wc -c < "$last")" ]; then
+  cp "$last" "$tmp"
+fi
+
+if [ "${#args[@]}" -gt 0 ]; then
+  exec "${here}/imgcat" -l "${args[@]}"
+fi
+exec "${here}/imgcat" -l

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Set the terminal window/tab title via OSC 0.
+set -euo pipefail
+
+title="$*"
+if [ -z "$title" ]; then
+  title="$(cat)"
+fi
+title="$(printf '%s' "$title" | tr -d '\000-\037\177')"
+printf '\033]0;%s\a' "$title"

@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: src/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/backend/go.mod
+          cache-dependency-path: src/backend/go.sum
+
+      - name: Install fnpack
+        run: |
+          curl -fsSL -o /usr/local/bin/fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64
+          chmod +x /usr/local/bin/fnpack
+
+      - name: Build FPK (x86 + arm64)
+        env:
+          VERSION: ${{ github.ref_name }}
+          FNPACK: fnpack
+        run: |
+          export VERSION="${VERSION#v}"
+          node scripts/build-fpk.mjs --all
+          (cd build/out && shasum -a 256 *.fpk > SHA256SUMS) || (cd build/out && sha256sum *.fpk > SHA256SUMS)
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/out/ofterm_x86.fpk
+            build/out/ofterm_arm.fpk
+            build/out/SHA256SUMS
+          generate_release_notes: true

@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Frontend install & test
+        working-directory: src/frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/backend/go.mod
+          cache-dependency-path: src/backend/go.sum
+
+      - name: Backend vet & test
+        working-directory: src/backend
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Install fnpack
+        run: |
+          curl -fsSL -o /usr/local/bin/fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64
+          chmod +x /usr/local/bin/fnpack
+
+      - name: Build FPK (x86 + arm64)
+        env:
+          VERSION: 0.1.0
+          FNPACK: fnpack
+        run: node scripts/build-fpk.mjs --all
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ofterm-fpk
+          path: build/out/*.fpk
+          if-no-files-found: error

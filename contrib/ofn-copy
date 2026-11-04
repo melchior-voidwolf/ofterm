@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Copy text to the terminal clipboard using OSC 52.
+set -euo pipefail
+
+if [ "$#" -gt 0 ]; then
+  data="$*"
+else
+  data="$(cat)"
+fi
+
+encoded="$(printf '%s' "$data" | base64 | tr -d '\n')"
+printf '\033]52;c;%s\a' "$encoded"

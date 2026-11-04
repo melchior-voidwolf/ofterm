@@ -1,0 +1,19 @@
+[
+    {
+        "stepTitle": "安装 OFTerm",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "OFTerm 是一个终端应用，需要通过飞牛 fnOS 账号认证后使用。"
+            },
+            {
+                "type": "tips",
+                "helpText": "应用以当前 fnOS 登录用户身份启动本地 Shell；需要管理员权限时由用户在 Shell 内使用 sudo。"
+            },
+            {
+                "type": "tips",
+                "helpText": "终端具有较高权限，请勿在其中执行来源不明的命令。"
+            }
+        ]
+    }
+]

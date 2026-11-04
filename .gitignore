@@ -1,0 +1,26 @@
+# Build outputs
+*.fpk
+/build/out/
+/build/staging/
+/dist/
+src/frontend/dist/
+src/backend/internal/web/dist/*
+!src/backend/internal/web/dist/.keep
+coverage/
+*.log
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+vendor/
+
+# Local
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Editor
+.idea/
+.vscode/
+*.swp

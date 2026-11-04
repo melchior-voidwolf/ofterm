@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Send a file to the browser as a download using OSC 1337 File=inline=0.
+set -euo pipefail
+
+if [ "$#" -ne 1 ]; then
+  echo "usage: ofn-dl FILE" >&2
+  exit 2
+fi
+file="$1"
+if [ ! -r "$file" ]; then
+  echo "ofn-dl: cannot read $file" >&2
+  exit 1
+fi
+
+name="$(basename "$file")"
+size="$(wc -c < "$file" | tr -d ' ')"
+payload="$(base64 < "$file" | tr -d '\n')"
+name_b64="$(printf '%s' "$name" | base64 | tr -d '\n')"
+printf '\033]1337;File=inline=0;size=%s;name=%s:%s\a' "$size" "$name_b64" "$payload"

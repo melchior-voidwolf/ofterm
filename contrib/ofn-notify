@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Show a desktop notification via OSC 9.
+set -euo pipefail
+
+msg="$*"
+if [ -z "$msg" ]; then
+  msg="$(cat)"
+fi
+# Strip control characters that would terminate the OSC sequence.
+msg="$(printf '%s' "$msg" | tr -d '\000-\010\013\014\016-\037\177')"
+printf '\033]9;%s\a' "$msg"

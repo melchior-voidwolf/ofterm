@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="OFTerm terminal icon">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EDF0F4"/>
+    </linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#1F2329" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <g filter="url(#softShadow)">
+    <rect x="123" y="123" width="778" height="778" rx="171" fill="url(#tile)"/>
+    <rect x="125" y="125" width="774" height="774" rx="169" fill="none" stroke="#1F2329" stroke-opacity="0.10" stroke-width="3"/>
+  </g>
+  <g stroke="#2681FF" stroke-width="82" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 317 400 L 447 530 L 317 660"/>
+    <path d="M 537 610 H 707"/>
+  </g>
+  <g transform="translate(-24 20)" stroke="#1F2329" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="620" cy="325" rx="32" ry="45"/>
+    <path d="M 685 370 V 280 H 745"/>
+    <path d="M 685 325 H 730"/>
+    <path d="M 772 280 H 835"/>
+    <path d="M 803 280 V 370"/>
+  </g>
+</svg>

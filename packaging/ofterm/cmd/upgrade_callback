@@ -1,0 +1,11 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=common
+source "${SCRIPT_DIR}/common"
+
+log_msg "upgrade_callback"
+mkdir -p "${TRIM_PKGVAR}" "${TRIM_PKGVAR}/logs" 2>/dev/null || true
+chmod 700 "${TRIM_PKGVAR}" 2>/dev/null || true
+rm -f "${SOCKET_PATH}"
+log_msg "Upgrade complete; data preserved"
+exit 0

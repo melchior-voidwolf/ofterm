@@ -1,0 +1,36 @@
+OFTerm
+Copyright 2026 OFTerm contributors
+
+Licensed under the GNU General Public License, version 2.0.
+See LICENSE for the full text.
+
+This product is an independent, clean-room implementation for fnOS. It is not
+derived from the source code of FntermX, which is not publicly available.
+
+This product includes third-party software. See THIRD_PARTY_LICENSES.md and the
+licenses/ directory for the full texts and attributions.
+
+Third-party assets used or referenced:
+
+* Material Design Colors theme
+  Copyright (c) 2015 Martin Seeler
+  Licensed under the MIT License (licenses/MIT-MartinSeeler-iterm2-material-design.txt)
+
+* iTerm2-Color-Schemes
+  Copyright (c) 2011 to Present Mark Badolato
+  Licensed under the MIT License (licenses/MIT-iTerm2-Color-Schemes.txt)
+
+* JetBrains Mono
+  Copyright 2020 The JetBrains Mono Project Authors
+  Licensed under the SIL Open Font License 1.1 (licenses/OFL-JetBrainsMono.txt)
+
+Trademarks and compatibility notes:
+
+* iTerm2 is a trademark of George Nachman. OFTerm is not affiliated with,
+  endorsed by, or sponsored by iTerm2 or its maintainers. iTerm2 preset names
+  are used only to describe color compatibility.
+* The built-in iTerm2 color presets are distributed here as independently
+  transcribed numeric color values, not as copies of iTerm2 source files.
+  See docs/CLEANROOM.md.
+* "飞牛" and "fnOS" are trademarks of their respective owners. This project is
+  an independent third-party application.

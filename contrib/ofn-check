@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Print a small capability report and emit a test notification.
+set -euo pipefail
+
+echo "OFTerm utilities"
+echo "  TERM=${TERM:-<unset>}"
+echo "  TERM_PROGRAM=${TERM_PROGRAM:-<unset>}"
+echo "  shell=${SHELL:-<unset>}"
+echo "  date=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+echo
+echo "Testing OSC 9 notification..."
+printf '\033]9;OFTerm utilities: notification test OK\a'
+echo "Testing OSC 52 clipboard..."
+printf 'OFTerm clipboard test\n' | "$(dirname "$0")/ofn-copy"
+echo "If a toast appeared and your clipboard contains the test text, the helpers work."

@@ -1,16 +1,30 @@
 {
-  "fntermx": {
-    "display_name": "fntermx 终端",
-    "desc": "一款支持持久化的终端应用",
-    "labels": "工具,效率",
-    "version": "1.1.0",
-    "author": "EWEDL",
-    "author_url": "https://github.com/EWEDLCM/",
-    "download_url": "",
-    "isdocker": "false",
-    "bug_report_url": "https://github.com/EWEDLCM/FnDepot/issues",
+  "ofterm": {
+    "display_name": "OFTerm 终端",
+    "platform": [
+      "x86",
+      "arm"
+    ],
+    "version": "0.1.0",
+    "desc": "面向飞牛 fnOS 的开源终端应用，iTerm2 风格界面与设置，提供本地 Shell。",
+    "labels": "工具,终端,效率",
+    "distributor": "OFTerm Contributors",
+    "distributor_url": "https://github.com/melchior-voidwolf/ofterm",
+    "bug_report_url": "https://github.com/melchior-voidwolf/ofterm/issues",
     "install_type": "系统空间",
-    "size": "28.7",
-    "changelog": "新增支持秘钥、系统识别、孤立日志清理、标签栏样式选择、光标样式选择；优化手机端样式、工具栏、手势操作（没有演示），改用db存储数据，开启外部访问地址填写"
+    "isdocker": "false",
+    "size": "3.6",
+    "download_url": "",
+    "changelog": "首个测试版本：OFTerm 重写、iTerm2 风格工作区、分屏、配色导入导出、图片协议与 utilities。",
+    "arch_diff": {
+      "x86": {
+        "size": "3.5",
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_x86.fpk"
+      },
+      "arm": {
+        "size": "3.2",
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_arm.fpk"
+      }
+    }
   }
 }

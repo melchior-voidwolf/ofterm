@@ -1,0 +1,10 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=common
+source "${SCRIPT_DIR}/common"
+
+log_msg "install_callback"
+mkdir -p "${TRIM_PKGVAR}" "${TRIM_PKGVAR}/logs" 2>/dev/null || true
+chmod 700 "${TRIM_PKGVAR}" 2>/dev/null || true
+log_msg "Data directory ready: ${TRIM_PKGVAR}"
+exit 0

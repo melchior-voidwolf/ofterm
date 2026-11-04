@@ -1,0 +1,15 @@
+import { chromium } from '@playwright/test'
+const browser = await chromium.launch({ headless: true })
+const page = await browser.newPage({ viewport: { width: 1280, height: 820 } })
+await page.goto('http://127.0.0.1:5122/?nogl=1', { waitUntil: 'networkidle' })
+await page.waitForTimeout(900)
+await page.getByRole('button', { name: '设置' }).click()
+await page.getByRole('tab', { name: 'Colors' }).click()
+await page.locator('input[type=file]').setInputFiles('/Users/kail/fntermx/themes/Material-Design-Colors.itermcolors')
+await page.waitForTimeout(600)
+const downloadPromise = page.waitForEvent('download')
+await page.getByRole('button', { name: '导出当前配色' }).click()
+const dl = await downloadPromise
+await dl.saveAs('/tmp/exported.itermcolors')
+console.log(dl.suggestedFilename())
+await browser.close()

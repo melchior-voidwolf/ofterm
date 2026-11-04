@@ -1,0 +1,6 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=common
+source "${SCRIPT_DIR}/common"
+log_msg "install_init"
+exit 0
