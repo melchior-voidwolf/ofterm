@@ -144,7 +144,7 @@ export class SessionClient {
         if (!res.ok) throw new Error(body?.error?.message ?? `ticket failed (${res.status})`)
         return body as { ticket: string }
       })
-      this.connect(wsUrl('/ws/terminal'), ['ofterm', `ticket.${ticket.ticket}`])
+      this.connect(wsUrl('/ws/terminal', { ticket: ticket.ticket }), ['ofterm', `ticket.${ticket.ticket}`])
     } catch (err) {
       this.showError(err instanceof Error ? err.message : String(err))
       this.setStatus('error')
@@ -398,12 +398,19 @@ export class SessionClient {
     this.setStatus('reconnecting')
     const delay = Math.min(500 * 2 ** this.reconnectAttempt++, 4000)
     this.reconnectTimer = window.setTimeout(() => {
-      this.connect(wsUrl('/ws/terminal'), [
-        'ofterm',
-        `session.${this.sessionId}`,
-        `resume.${this.resumeToken}`,
-        `seq.${this.lastSeq}`,
-      ])
+      this.connect(
+        wsUrl('/ws/terminal', {
+          sessionId: this.sessionId,
+          resumeToken: this.resumeToken,
+          lastSeq: this.lastSeq,
+        }),
+        [
+          'ofterm',
+          `session.${this.sessionId}`,
+          `resume.${this.resumeToken}`,
+          `seq.${this.lastSeq}`,
+        ],
+      )
     }, delay)
   }
 

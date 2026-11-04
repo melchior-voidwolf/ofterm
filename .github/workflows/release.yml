@@ -40,7 +40,7 @@ jobs:
 
       - name: Build FPK (x86 + arm64)
         env:
-          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '0.1.7-dev' }}
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '0.1.8-dev' }}
           FNPACK: fnpack
         run: |
           export VERSION="${VERSION#v}"
@@ -62,7 +62,7 @@ jobs:
           TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'release' }}
         run: |
           if [ "$TAG" = "release" ]; then
-            gh release create "$TAG" --target "$GITHUB_SHA" --title "Release 0.1.7-dev" --prerelease --notes "Rolling release build" 2>/dev/null || true
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "Release 0.1.8-dev" --prerelease --notes "Rolling release build" 2>/dev/null || true
           else
             gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes "OFTerm $TAG" 2>/dev/null || true
           fi

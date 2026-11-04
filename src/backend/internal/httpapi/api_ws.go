@@ -72,6 +72,13 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusForbidden, "origin", "origin not allowed")
 		return
 	}
+	ci, _ := gateway.FromContext(r.Context())
+	s.log.Info("terminal websocket request",
+		"host", r.Host,
+		"origin", r.Header.Get("Origin"),
+		"listener", ci.Kind,
+		"has_ticket", r.URL.Query().Get("ticket") != "" || wsProtocolToken(r, "ticket") != "",
+	)
 
 	var sess *term.Session
 	var sub *term.Subscriber
@@ -165,6 +172,7 @@ func (s *Server) handleTerminalWS(w http.ResponseWriter, r *http.Request) {
 		Subprotocols:       []string{"ofterm"},
 	})
 	if err != nil {
+		s.log.Warn("terminal websocket accept failed", "error", err)
 		sub.Close()
 		sess.Kill("websocket accept failed")
 		return
