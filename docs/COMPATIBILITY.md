@@ -11,8 +11,8 @@
 
 | 目标 | Go | fnOS platform | 产物 |
 |---|---|---|---|
-| x86_64 | `linux/amd64` | `x86` | `ofterm_x86.fpk` |
-| arm64 | `linux/arm64` | `arm` | `ofterm_arm.fpk` |
+| x86_64 | `linux/amd64` | `x86` | `ofterm_<version>_x86.fpk` |
+| arm64 | `linux/arm64` | `arm` | `ofterm_<version>_arm.fpk` |
 | 龙芯（未来） | `linux/loong64` | 待官方定义 | 预留矩阵项 |
 
 架构只在 `build/architectures.json` 中定义；后端无架构分支。新增架构不需要改 Go 代码。fnpack 的 arch 字符串与 FnDepot 的 `platform` 值分开映射，避免写死。
