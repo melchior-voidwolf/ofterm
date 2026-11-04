@@ -35,6 +35,7 @@ type Session struct {
 	exited      bool
 	exitCode    int
 	exitSignal  string
+	jobName     string
 	done        chan struct{}
 	closeOnce   sync.Once
 }
@@ -65,6 +66,38 @@ func newResumeToken() (string, error) {
 func (s *Session) startLoops() {
 	go s.readLoop()
 	go s.waitLoop()
+	go s.watchJob()
+}
+
+// watchJob tracks the PTY's foreground job (like iTerm2's tab titles) and
+// pushes OpTitle control messages when it changes, once per second at most.
+func (s *Session) watchJob() {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		if name := foregroundJobName(s.ptmx); name != "" {
+			s.setJobName(name)
+		}
+		select {
+		case <-ticker.C:
+		case <-s.done:
+			return
+		}
+	}
+}
+
+func (s *Session) setJobName(name string) {
+	s.mu.Lock()
+	if name == s.jobName {
+		s.mu.Unlock()
+		return
+	}
+	s.jobName = name
+	sub := s.sub
+	s.mu.Unlock()
+	if sub != nil {
+		sub.SendControl(OpTitle, name)
+	}
 }
 
 func (s *Session) readLoop() {
@@ -191,8 +224,8 @@ func (s *Session) publish(data []byte) {
 // already rendered; 0 means "send the retained buffer" (new attach).
 func (s *Session) Attach(lastSeq uint64) (*Subscriber, []Frame, error) {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	if s.exited || s.closing {
+		s.mu.Unlock()
 		return nil, nil, ErrSessionClosed
 	}
 	if s.killTimer != nil {
@@ -203,6 +236,7 @@ func (s *Session) Attach(lastSeq uint64) (*Subscriber, []Frame, error) {
 		s.sub.Close()
 	}
 	if lastSeq > 0 && lastSeq+1 < s.baseSeq {
+		s.mu.Unlock()
 		return nil, nil, ErrBufferExpired
 	}
 	var replay []Frame
@@ -213,6 +247,12 @@ func (s *Session) Attach(lastSeq uint64) (*Subscriber, []Frame, error) {
 	}
 	sub := newSubscriber()
 	s.sub = sub
+	job := s.jobName
+	s.mu.Unlock()
+	// Catch the (re)attached client up on the current job title.
+	if job != "" {
+		sub.SendControl(OpTitle, job)
+	}
 	return sub, replay, nil
 }
 

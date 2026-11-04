@@ -8,6 +8,7 @@ import { WebglAddon } from '@xterm/addon-webgl'
 import { apiUrl, wsUrl } from '../lib/api'
 import type { Settings } from '../settings/types'
 import { xtermTheme } from '../theme'
+import { t } from '../i18n'
 
 export type SessionStatus = 'connecting' | 'connected' | 'reconnecting' | 'ended' | 'error'
 
@@ -15,6 +16,7 @@ export interface SessionCallbacks {
   onStatus?: (status: SessionStatus, detail?: string) => void
   onSize?: (cols: number, rows: number) => void
   onTitle?: (title: string) => void
+  onJob?: (name: string) => void
 }
 
 const OP_DATA = 0x01
@@ -26,6 +28,7 @@ const OP_PONG = 0x06
 const OP_READY = 0x07
 const OP_ACK = 0x08
 const OP_CLOSE = 0x0a
+const OP_TITLE = 0x0b
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -260,7 +263,7 @@ export class SessionClient {
         const bytes = Uint8Array.from(atob(data.slice(colon + 1)), (c) => c.charCodeAt(0))
         const text = decoder.decode(bytes)
         void navigator.clipboard?.writeText(text).catch(() => undefined)
-        window.dispatchEvent(new CustomEvent('ofterm:notify', { detail: { message: '已复制到剪贴板', kind: 'success' } }))
+        window.dispatchEvent(new CustomEvent('ofterm:notify', { detail: { message: t('已复制到剪贴板'), kind: 'success' } }))
       } catch {
         // ignore malformed clipboard payloads
       }
@@ -355,7 +358,7 @@ export class SessionClient {
           // ignore
         }
         const reason = info.signal ? `signal ${info.signal}` : `exit ${info.code ?? 0}`
-        this.terminal.writeln(`\r\n\x1b[90m[会话已结束：${reason}]\x1b[0m`)
+        this.terminal.writeln(`\r\n\x1b[90m[${t('会话已结束：')}${reason}]\x1b[0m`)
         this.intentional = true
         this.setStatus('ended', reason)
         break
@@ -373,6 +376,12 @@ export class SessionClient {
       case OP_PONG:
         this.lastPong = Date.now()
         break
+      case OP_TITLE: {
+        // Backend-pushed foreground job name (iTerm2-style tab titles).
+        const name = decoder.decode(buf.subarray(1)).trim()
+        if (name) this.callbacks.onJob?.(name)
+        break
+      }
       default:
         break
     }
@@ -385,13 +394,13 @@ export class SessionClient {
       return
     }
     if (!this.sessionId || !this.resumeToken) {
-      this.showError('连接已断开')
+      this.showError(t('连接已断开'))
       this.setStatus('error')
       return
     }
     if (!this.reconnectStarted) this.reconnectStarted = Date.now()
     if (Date.now() - this.reconnectStarted > this.settings.graceSeconds * 1000) {
-      this.showNotice('重连超时，会话已结束')
+      this.showNotice(t('重连超时，会话已结束'))
       this.setStatus('ended', 'reconnect timeout')
       return
     }
@@ -516,7 +525,7 @@ export class SessionClient {
 
   runCommand(command: string) {
     if (this.status !== 'connected' || this.ws?.readyState !== WebSocket.OPEN) {
-      this.showError('终端尚未连接')
+      this.showError(t('终端尚未连接'))
       return
     }
     this.sendData(command + '\r')
@@ -524,7 +533,7 @@ export class SessionClient {
   }
 
   private showError(message: string) {
-    this.terminal.writeln(`\r\n\x1b[31m[错误] ${message}\x1b[0m`)
+    this.terminal.writeln(`\r\n\x1b[31m[${t('错误')}] ${message}\x1b[0m`)
   }
 
   private showNotice(message: string) {

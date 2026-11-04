@@ -21,8 +21,24 @@ export interface SplitNode {
 
 export type PaneNode = LeafNode | SplitNode
 
-export function newPane(title = '本地 Shell'): PaneSpec {
+export function newPane(title = 'Shell'): PaneSpec {
   return { id: randomId(), title }
+}
+
+export function updatePaneTitle(node: PaneNode, paneId: string, title: string): PaneNode {
+  if (node.type === 'leaf') {
+    return node.pane.id === paneId ? { ...node, pane: { ...node.pane, title } } : node
+  }
+  return {
+    ...node,
+    first: updatePaneTitle(node.first, paneId, title),
+    second: updatePaneTitle(node.second, paneId, title),
+  }
+}
+
+export function paneTitleOf(node: PaneNode, paneId: string): string | null {
+  if (node.type === 'leaf') return node.pane.id === paneId ? node.pane.title : null
+  return paneTitleOf(node.first, paneId) ?? paneTitleOf(node.second, paneId)
 }
 
 export function collectPanes(node: PaneNode): PaneSpec[] {

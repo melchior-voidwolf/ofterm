@@ -7,10 +7,12 @@ import { defaultSettings, type Settings } from './settings/types'
 import {
   collectPanes,
   newPane,
+  paneTitleOf,
   removePane,
   layoutPanes,
   setSplitRatio,
   splitPane,
+  updatePaneTitle,
   type PaneNode,
   type Rect,
 } from './session/panes'
@@ -18,6 +20,7 @@ import type { SessionClient, SessionStatus } from './session/SessionClient'
 import { blendHex, themeColors } from './theme'
 import { UTILITIES_BUNDLE } from './lib/utilities-bundle'
 import { randomId } from './lib/id'
+import { resolveLocale, setLocale, t } from './i18n'
 
 interface Me {
   authenticated: boolean
@@ -106,6 +109,8 @@ export default function App() {
 
 function Workspace({ me }: { me: Me }) {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
+  // Module-level locale: every component below re-renders on settings change.
+  setLocale(resolveLocale(settings.language))
   const [tabs, setTabs] = useState<Tab[]>([])
   const [activeId, setActiveId] = useState('')
   const [statuses, setStatuses] = useState<Record<string, StatusEntry>>({})
@@ -228,10 +233,29 @@ function Workspace({ me }: { me: Me }) {
   const activatePane = useCallback(
     (tabId: string, paneId: string) => {
       setActiveId(tabId)
-      updateTab(tabId, (tab) => ({ ...tab, activePaneId: paneId }))
+      updateTab(tabId, (tab) => ({
+        ...tab,
+        activePaneId: paneId,
+        title: paneTitleOf(tab.root, paneId) ?? tab.title,
+      }))
     },
     [updateTab],
   )
+
+  // A pane's title follows its foreground job (or OSC title); the tab shows
+  // the title of its active pane, like iTerm2.
+  const onPaneTitle = useCallback((paneId: string, title: string) => {
+    setTabs((prev) =>
+      prev.map((tab) => {
+        if (!collectPanes(tab.root).some((p) => p.id === paneId)) return tab
+        return {
+          ...tab,
+          root: updatePaneTitle(tab.root, paneId, title),
+          title: tab.activePaneId === paneId ? title : tab.title,
+        }
+      }),
+    )
+  }, [])
 
   const splitPaneById = useCallback(
     (tabId: string, paneId: string, direction: 'row' | 'column') => {
@@ -355,7 +379,7 @@ function Workspace({ me }: { me: Me }) {
 
   const installUtilities = useCallback(() => {
     if (!activeClient) {
-      setToast({ message: '请先打开一个终端', kind: 'info' })
+      setToast({ message: t('请先打开一个终端'), kind: 'info' })
       return
     }
     const chunks = UTILITIES_BUNDLE.match(/.{1,800}/g) ?? []
@@ -380,7 +404,7 @@ function Workspace({ me }: { me: Me }) {
     ]
     activeClient.runCommand(lines.join('\n'))
     setSettingsOpen(false)
-    setToast({ message: '辅助工具安装已启动', kind: 'success' })
+    setToast({ message: t('辅助工具安装已启动'), kind: 'success' })
   }, [activeClient])
 
   const closeSearch = () => {
@@ -407,7 +431,7 @@ function Workspace({ me }: { me: Me }) {
       }
     >
       <div className="tabbar">
-        <div className="tabbar-tabs" role="tablist" aria-label="终端标签">
+        <div className="tabbar-tabs" role="tablist" aria-label={t('终端标签')}>
           {tabs.map((tab) => {
             const pane = collectPanes(tab.root).find((p) => p.id === tab.activePaneId)
             const status = statuses[pane?.id ?? '']?.status ?? 'connecting'
@@ -426,7 +450,7 @@ function Workspace({ me }: { me: Me }) {
                 <span className="tab-title">{tab.title}</span>
                 <button
                   className="tab-close"
-                  aria-label="关闭标签"
+                  aria-label={t('关闭标签')}
                   onClick={(e) => {
                     e.stopPropagation()
                     closeTab(tab.id)
@@ -437,15 +461,15 @@ function Workspace({ me }: { me: Me }) {
               </div>
             )
           })}
-          <button className="new-tab-button" title="新建标签 (⌘⇧Enter)" aria-label="新建标签" onClick={addTab}>
+          <button className="new-tab-button" title={t('新建标签 (⌘⇧Enter)')} aria-label={t('新建标签')} onClick={addTab}>
             <Plus size={15} />
           </button>
         </div>
         <div className="tabbar-actions">
           <button
             className="toolbar-button"
-            title="搜索 (⌘⇧F)"
-            aria-label="搜索"
+            title={t('搜索 (⌘⇧F)')}
+            aria-label={t('搜索')}
             onClick={() => {
               setSearchOpen(true)
               requestAnimationFrame(() => searchInput.current?.focus())
@@ -453,7 +477,7 @@ function Workspace({ me }: { me: Me }) {
           >
             <Search size={15} />
           </button>
-          <button className="toolbar-button" title="Settings" aria-label="设置" onClick={() => setSettingsOpen(true)}>
+          <button className="toolbar-button" title={t('设置')} aria-label={t('设置')} onClick={() => setSettingsOpen(true)}>
             <SettingsIcon size={15} />
           </button>
         </div>
@@ -473,13 +497,13 @@ function Workspace({ me }: { me: Me }) {
               if (e.key === 'Escape') closeSearch()
               else if (e.key === 'Enter') search(e.shiftKey)
             }}
-            placeholder="搜索"
+            placeholder={t('搜索')}
             spellCheck={false}
           />
-          <button className="icon-button" title="上一个" onClick={() => search(true)}>
+          <button className="icon-button" title={t('上一个')} onClick={() => search(true)}>
             <CornerDownLeft size={13} style={{ transform: 'scaleY(-1)' }} />
           </button>
-          <button className="icon-button" title="关闭" onClick={closeSearch}>
+          <button className="icon-button" title={t('关闭')} onClick={closeSearch}>
             <X size={13} />
           </button>
         </div>
@@ -489,9 +513,9 @@ function Workspace({ me }: { me: Me }) {
         {tabs.length === 0 ? (
           <div className="empty-state">
             <Terminal size={28} />
-            <h2>没有打开的标签</h2>
+            <h2>{t('没有打开的标签')}</h2>
             <button className="primary-button" onClick={addTab}>
-              <Plus size={14} /> 新建标签
+              <Plus size={14} /> {t('新建标签')}
             </button>
           </div>
         ) : null}
@@ -506,6 +530,7 @@ function Workspace({ me }: { me: Me }) {
               onStatus={onStatus}
               onSize={onSize}
               onActivate={activatePane}
+              onTitle={onPaneTitle}
               onSplit={splitPaneById}
               onClosePane={closePaneById}
               onRatio={(tabId, splitId, ratio) => updateTab(tabId, (t) => ({ ...t, root: setSplitRatio(t.root, splitId, ratio) }))}
@@ -518,7 +543,7 @@ function Workspace({ me }: { me: Me }) {
 
       <footer className="statusbar">
         <span className={`status-text status-${activeStatus?.status ?? 'connecting'}`}>
-          {STATUS_LABEL[activeStatus?.status ?? 'connecting']}
+          {t(STATUS_LABEL[activeStatus?.status ?? 'connecting'])}
         </span>
         {activeTab ? <span className="status-sep">{activeTab.title}</span> : null}
         {activeStatus?.cols ? (
@@ -543,6 +568,7 @@ interface TabPanesProps {
   onClient: (id: string, client: SessionClient | null) => void
   onStatus: (id: string, status: SessionStatus, detail?: string) => void
   onSize: (id: string, cols: number, rows: number) => void
+  onTitle: (paneId: string, title: string) => void
   onActivate: (tabId: string, paneId: string) => void
   onSplit: (tabId: string, paneId: string, direction: 'row' | 'column') => void
   onClosePane: (tabId: string, paneId: string) => void
@@ -563,7 +589,7 @@ function snappedRect(rect: Rect, size: { w: number; h: number }) {
   }
 }
 
-function TabPanes({ tab, active, settings, mode, onClient, onStatus, onSize, onActivate, onSplit, onClosePane, onRatio }: TabPanesProps) {
+function TabPanes({ tab, active, settings, mode, onClient, onStatus, onSize, onTitle, onActivate, onSplit, onClosePane, onRatio }: TabPanesProps) {
   const layerRef = useRef<HTMLDivElement>(null)
   const [layerSize, setLayerSize] = useState<{ w: number; h: number } | null>(null)
   useEffect(() => {
@@ -602,6 +628,7 @@ function TabPanes({ tab, active, settings, mode, onClient, onStatus, onSize, onA
             onClient={onClient}
             onStatus={onStatus}
             onSize={onSize}
+            onTitle={onTitle}
             onActivate={() => onActivate(tab.id, pane.id)}
             onSplit={(direction) => onSplit(tab.id, pane.id, direction)}
             onClose={() => onClosePane(tab.id, pane.id)}

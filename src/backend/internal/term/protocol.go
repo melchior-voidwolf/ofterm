@@ -19,6 +19,7 @@ const (
 	OpAck    byte = 0x08
 	OpResume byte = 0x09
 	OpClose  byte = 0x0A
+	OpTitle  byte = 0x0B
 )
 
 const (
