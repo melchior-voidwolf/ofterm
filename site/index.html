@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>OFTerm - fnOS Terminal, iTerm2 Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="OFTerm is an open-source, iTerm2-style terminal for fnOS. Split panes, smart tab titles, iTerm2 color presets, bilingual UI.">
+  <link rel="icon" type="image/png" href="img/icon_64.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f2f2f2;
+      color: #222222;
+      font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+
+    /* Logo header */
+    .logo-header { text-align: center; padding: 40px 0 28px; }
+    .logo-header img { width: 96px; height: 96px; border-radius: 22px; vertical-align: middle; }
+    .logo-header .wordmark {
+      display: inline-block; vertical-align: middle; margin-left: 18px; text-align: left;
+    }
+    .logo-header .wordmark .name { font-size: 44px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+    .logo-header .wordmark .tagline { font-size: 16px; color: #6f6f6f; margin-top: 4px; }
+
+    /* Top bar */
+    .top-bar { background: #333333; }
+    .top-bar .wrap { display: flex; align-items: stretch; }
+    .top-bar ul { list-style: none; display: flex; }
+    .top-bar a {
+      display: block; color: #ffffff; text-decoration: none;
+      padding: 12px 18px; font-size: 14px;
+    }
+    .top-bar a:hover { background: #222222; }
+    .top-bar li.active a { background: #008cba; }
+    .top-bar .spacer { flex: 1; }
+    .lang-toggle {
+      background: none; border: 1px solid #666; border-radius: 4px; color: #fff;
+      font-size: 12px; padding: 3px 10px; margin: 9px 4px; cursor: pointer;
+      font-family: inherit;
+    }
+    .lang-toggle:hover { background: #222; border-color: #999; }
+
+    /* Main panel */
+    .main {
+      background: #ffffff;
+      padding: 36px 44px 44px;
+      margin-top: 28px;
+      border: 1px solid #e0e0e0;
+    }
+    .main h3 {
+      font-size: 22px; font-weight: 600; margin: 34px 0 10px; color: #222;
+    }
+    .main h3:first-child { margin-top: 0; }
+    .main p { margin: 10px 0; color: #3a3a3a; }
+    .main a { color: #008cba; text-decoration: none; }
+    .main a:hover { text-decoration: underline; }
+    .main img.shot {
+      display: block; max-width: 100%; margin: 16px auto;
+      border: 1px solid #e0e0e0; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .feature-block { border-top: 1px solid #eee; padding-top: 8px; margin-top: 30px; }
+    .feature-block:first-of-type { border-top: none; margin-top: 0; }
+    kbd {
+      background: #f5f5f5; border: 1px solid #ccc; border-radius: 4px;
+      padding: 1px 6px; font-size: 13px; font-family: inherit;
+    }
+    code {
+      background: #f5f5f5; border-radius: 4px; padding: 1px 6px;
+      font-family: Menlo, Consolas, monospace; font-size: 14px;
+    }
+    pre {
+      background: #2b2b2b; color: #e8e8e8; border-radius: 8px;
+      padding: 14px 18px; overflow-x: auto; margin: 12px 0;
+      font-family: Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.5;
+    }
+    .download-buttons { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0 8px; }
+    .dl-button {
+      display: inline-block; background: #008cba; color: #fff !important;
+      padding: 12px 26px; border-radius: 6px; font-size: 15px; font-weight: 600;
+      text-decoration: none !important;
+    }
+    .dl-button:hover { background: #0079a1; }
+    .dl-button.secondary { background: #5a5a5a; }
+    .dl-button.secondary:hover { background: #444; }
+    .muted { color: #8a8a8a; font-size: 14px; }
+
+    footer { text-align: center; color: #8a8a8a; font-size: 14px; padding: 28px 0 40px; }
+    footer a { color: #008cba; text-decoration: none; }
+    footer p { margin: 4px 0; }
+
+    @media (max-width: 640px) {
+      .main { padding: 24px 18px 32px; }
+      .logo-header .wordmark .name { font-size: 32px; }
+      .top-bar a { padding: 12px 10px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-header">
+      <img src="img/icon_256.png" alt="OFTerm icon">
+      <span class="wordmark">
+        <div class="name">OFTerm</div>
+        <div class="tagline" data-i18n="tagline">为飞牛 fnOS 打造的 iTerm2 风格终端</div>
+      </span>
+    </div>
+    <nav class="top-bar">
+      <div class="wrap">
+        <ul>
+          <li class="active"><a href="#" data-i18n="nav-home">首页</a></li>
+          <li><a href="#features" data-i18n="nav-features">功能</a></li>
+          <li><a href="#download" data-i18n="nav-download">下载</a></li>
+          <li><a href="https://github.com/melchior-voidwolf/ofterm">GitHub</a></li>
+        </ul>
+        <div class="spacer"></div>
+        <button class="lang-toggle" id="langToggle">EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="main">
+      <h3 data-i18n="what-title">什么是 OFTerm？</h3>
+      <p data-i18n="what-body">OFTerm 是运行在飞牛 fnOS 上的开源终端，界面与交互全面看齐 iTerm2：分屏、智能标签标题、iTerm2 经典配色、亮色/暗色主题、终端内搜索。后端为单个 Go 静态二进制，前端基于 xterm.js，通过 fnOS 统一网关运行，无遥测、无外部请求。</p>
+
+      <h3 data-i18n="why-title">为什么用 OFTerm？</h3>
+      <p data-i18n="why-body">如果你习惯 iTerm2，打开 OFTerm 的一切都会感到熟悉：<kbd>⌘\</kbd> 向右分屏、标签标题自动跟随当前运行的程序（vim、ssh、htop……）、11 套 iTerm2 内置配色外加 Material Design Colors，还可以直接导入自己的 <code>.itermcolors</code>。如果你在终端里泡的时间很长，这些细节加起来就是效率。OFTerm 是自由软件，源码在 <a href="https://github.com/melchior-voidwolf/ofterm">GitHub</a> 上以 Apache-2.0 协议发布。</p>
+
+      <h3 data-i18n="how-title">如何安装？</h3>
+      <p data-i18n="how-body">在 fnOS 应用中心添加自定义应用源，填入下面的地址即可看到并安装 OFTerm；也可以直接从 GitHub Releases 下载 fpk 手动安装。</p>
+      <pre>https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/fnpack.json</pre>
+
+      <div class="feature-block" id="features">
+        <h3 data-i18n="f-split">分屏与标签</h3>
+        <p data-i18n="f-split-body">把一个标签切成任意多个 pane，横竖随意组合。每个 pane 是独立会话，右上角提供分屏与关闭按钮，拖动分隔线调整尺寸。非聚焦的 pane 会稍微变暗，一眼看清焦点在哪。</p>
+        <img class="shot" src="img/1.png" alt="Split panes workspace">
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-titles">标签标题跟随前台任务</h3>
+        <p data-i18n="f-titles-body">和 iTerm2 一样，标签标题不再永远是“Shell”——它实时显示当前正在运行的程序：打开 vim 显示 vim，连上 ssh 显示 ssh，跑起 htop 显示 htop。支持 shell 集成（OSC）的标题设置，两者自动取最新。</p>
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-colors">iTerm2 配色</h3>
+        <p data-i18n="f-colors-body">内置 iTerm2 全部 11 套经典预设——Solarized Dark/Light、Tango、Pastel、Smoooooth 等等——外加默认的 Material Design Colors。也支持一键导入/导出 <code>.itermcolors</code> 文件。</p>
+        <img class="shot" src="img/2.png" alt="Color presets">
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-shortcuts">快捷键与帮助</h3>
+        <p data-i18n="f-shortcuts-body">新建标签、分屏、关闭 pane、搜索、清屏都有趁手的快捷键，macOS 与 Windows/Linux 键位分别适配。内置帮助页随时可查。</p>
+        <img class="shot" src="img/3.png" alt="Help and shortcuts">
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-theme">亮色与暗色</h3>
+        <p data-i18n="f-theme-body">界面主题支持亮色、暗色与跟随系统，终端配色独立于界面主题，可自由组合。</p>
+        <img class="shot" src="img/4.png" alt="Light theme">
+      </div>
+
+      <div class="feature-block">
+        <h3 data-i18n="f-more">还有更多</h3>
+        <p data-i18n="f-more-body">终端内显示图片（imgcat）、页内搜索、WebGL 渲染（自动降级）、断线短时重连、粘贴防护、中英文界面一键切换、随包附带 JetBrains Mono 兜底字体保证跨平台对齐。</p>
+      </div>
+
+      <div class="feature-block" id="download">
+        <h3 data-i18n="dl-title">下载</h3>
+        <p data-i18n="dl-body">当前版本 v1.0.0，支持 fnOS x86_64 与 arm64。</p>
+        <div class="download-buttons">
+          <a class="dl-button" href="https://github.com/melchior-voidwolf/ofterm/releases/download/v1.0.0/ofterm_1.0.0_x86.fpk">x86_64 · v1.0.0</a>
+          <a class="dl-button" href="https://github.com/melchior-voidwolf/ofterm/releases/download/v1.0.0/ofterm_1.0.0_arm.fpk">arm64 · v1.0.0</a>
+          <a class="dl-button secondary" href="https://github.com/melchior-voidwolf/ofterm/releases" data-i18n="dl-all">所有版本</a>
+        </div>
+        <p class="muted" data-i18n="dl-note">推荐通过自定义应用源安装，升级更省心。校验值见 Release 页面的 SHA256SUMS。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>OFTerm · <span data-i18n="footer-free">自由开源软件，Apache-2.0 协议</span></p>
+    <p><a href="https://github.com/melchior-voidwolf/ofterm">GitHub</a> · <a href="https://github.com/melchior-voidwolf/ofterm/issues" data-i18n="footer-issues">问题反馈</a> · <a href="https://github.com/melchior-voidwolf/ofterm/blob/main/THIRD_PARTY_LICENSES.md" data-i18n="footer-licenses">第三方许可</a></p>
+  </footer>
+
+  <script>
+    const en = {
+      'tagline': 'An iTerm2-style terminal for fnOS',
+      'nav-home': 'Home',
+      'nav-features': 'Features',
+      'nav-download': 'Downloads',
+      'what-title': 'What is OFTerm?',
+      'what-body': 'OFTerm is an open-source terminal for fnOS, designed to feel like iTerm2: split panes, smart tab titles, the classic iTerm2 color presets, light and dark themes, and in-terminal search. The backend is a single static Go binary, the frontend is built on xterm.js, and it runs through the fnOS unified gateway. No telemetry, no external requests.',
+      'why-title': 'Why do I want it?',
+      'why-body': 'If you live in iTerm2, everything here is familiar: ⌘\\ splits right, tab titles follow the program you are running (vim, ssh, htop…), all 11 built-in iTerm2 color presets plus Material Design Colors, and you can import your own .itermcolors. If you spend a lot of time in a terminal, these little things add up. OFTerm is free software, released on GitHub under the Apache-2.0 license.',
+      'how-title': 'How do I install it?',
+      'how-body': 'Add a custom app source in the fnOS App Center with the address below, and OFTerm appears ready to install. You can also grab the fpk directly from GitHub Releases.',
+      'f-split': 'Split Panes & Tabs',
+      'f-split-body': 'Slice a tab into as many panes as you like, vertically and horizontally. Each pane is an independent session with split and close controls in the corner, and draggable dividers. Inactive panes are slightly dimmed so the active one is obvious.',
+      'f-titles': 'Tab Titles Follow the Foreground Job',
+      'f-titles-body': 'Just like iTerm2, a tab is no longer called “Shell” forever — it shows what is actually running: vim while you edit, ssh while you are away, htop while you watch. Shell-integration (OSC) titles are honored too; the freshest title always wins.',
+      'f-colors': 'iTerm2 Color Presets',
+      'f-colors-body': 'All 11 classic iTerm2 presets are built in — Solarized Dark/Light, Tango, Pastel, Smoooooth and more — plus the default Material Design Colors. One-click import and export of .itermcolors files is supported.',
+      'f-shortcuts': 'Shortcuts & Help',
+      'f-shortcuts-body': 'New tab, split, close pane, search and clear all have handy shortcuts, with separate keymaps for macOS and Windows/Linux. A built-in help page lists them all.',
+      'f-theme': 'Light & Dark',
+      'f-theme-body': 'The interface supports light, dark, and follow-system modes. Terminal colors are independent of the UI theme, so you can mix and match.',
+      'f-more': 'And More',
+      'f-more-body': 'Inline images (imgcat), find-on-page, WebGL rendering with automatic fallback, short-window reconnection, paste protection, one-click Chinese/English UI, and a bundled JetBrains Mono fallback font for pixel-consistent alignment everywhere.',
+      'dl-title': 'Downloads',
+      'dl-body': 'Current release: v1.0.0, for fnOS x86_64 and arm64.',
+      'dl-all': 'All releases',
+      'dl-note': 'Installing via the custom app source is recommended for easier upgrades. Checksums are in SHA256SUMS on the release page.',
+      'footer-free': 'Free and open source software, Apache-2.0',
+      'footer-issues': 'Issue tracker',
+      'footer-licenses': 'Third-party licenses',
+    }
+
+    let lang = localStorage.getItem('ofterm-site-lang')
+      || (navigator.language && navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en')
+
+    const toggle = document.getElementById('langToggle')
+
+    function apply() {
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
+      toggle.textContent = lang === 'zh' ? 'EN' : '中文'
+      if (lang === 'en') {
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          const key = el.getAttribute('data-i18n')
+          if (!el.dataset.zh) el.dataset.zh = el.innerHTML
+          if (en[key]) el.innerHTML = en[key]
+        })
+      } else {
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          if (el.dataset.zh) el.innerHTML = el.dataset.zh
+        })
+      }
+    }
+
+    toggle.addEventListener('click', () => {
+      lang = lang === 'zh' ? 'en' : 'zh'
+      localStorage.setItem('ofterm-site-lang', lang)
+      apply()
+    })
+
+    apply()
+  </script>
+</body>
+</html>
