@@ -1,4 +1,5 @@
 import * as plist from 'plist'
+import { randomId } from '../lib/id'
 import type { CustomTheme, Theme, ThemeColors } from './index'
 
 type PlistDict = Record<string, unknown>
@@ -52,7 +53,7 @@ export function parseITermColors(text: string, fileName: string): CustomTheme {
   if (link) colors.link = link
   const name = fileName.replace(/\.itermcolors$/i, '').replace(/[_-]+/g, ' ').trim() || 'Imported Colors'
   return {
-    id: `custom-${crypto.randomUUID()}`,
+    id: `custom-${randomId()}`,
     name,
     colors,
   }

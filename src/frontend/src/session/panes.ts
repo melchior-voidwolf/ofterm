@@ -1,3 +1,5 @@
+import { randomId } from '../lib/id'
+
 export interface PaneSpec {
   id: string
   title: string
@@ -20,7 +22,7 @@ export interface SplitNode {
 export type PaneNode = LeafNode | SplitNode
 
 export function newPane(title = '本地 Shell'): PaneSpec {
-  return { id: crypto.randomUUID(), title }
+  return { id: randomId(), title }
 }
 
 export function collectPanes(node: PaneNode): PaneSpec[] {
@@ -33,7 +35,7 @@ export function splitPane(node: PaneNode, targetPaneId: string, pane: PaneSpec, 
     if (node.pane.id !== targetPaneId) return node
     return {
       type: 'split',
-      id: crypto.randomUUID(),
+      id: randomId(),
       direction,
       ratio: 0.5,
       first: node,

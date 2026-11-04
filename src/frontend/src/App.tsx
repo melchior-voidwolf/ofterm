@@ -16,6 +16,7 @@ import {
 import type { SessionClient, SessionStatus } from './session/SessionClient'
 import { blendHex, themeColors } from './theme'
 import { UTILITIES_BUNDLE } from './lib/utilities-bundle'
+import { randomId } from './lib/id'
 
 interface Me {
   authenticated: boolean
@@ -177,7 +178,7 @@ function Workspace({ me }: { me: Me }) {
   const addTab = useCallback(() => {
     const pane = newPane()
     const tab: Tab = {
-      id: crypto.randomUUID(),
+      id: randomId(),
       title: pane.title,
       root: { type: 'leaf', pane },
       activePaneId: pane.id,
