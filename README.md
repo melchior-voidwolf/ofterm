@@ -10,7 +10,16 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 
-![OFTerm workspace](ofterm/Preview/1.png)
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="ofterm/Preview/1.png" alt="OFTerm split workspace"><br><sub>Split workspace</sub></td>
+    <td width="50%" align="center"><img src="ofterm/Preview/2.png" alt="OFTerm color presets"><br><sub>Color presets</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="ofterm/Preview/3.png" alt="OFTerm built-in help"><br><sub>Built-in help</sub></td>
+    <td width="50%" align="center"><img src="ofterm/Preview/4.png" alt="OFTerm light theme"><br><sub>Light theme</sub></td>
+  </tr>
+</table>
 
 > **Status:** pre-release. The package builds for x86_64 and arm64, but it has not yet been submitted to or approved by the fnOS app store. Interfaces and packaging may change before the first stable release.
 

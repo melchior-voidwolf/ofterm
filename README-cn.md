@@ -10,7 +10,16 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 
-![OFTerm workspace](ofterm/Preview/1.png)
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="ofterm/Preview/1.png" alt="OFTerm 分屏工作区"><br><sub>分屏工作区</sub></td>
+    <td width="50%" align="center"><img src="ofterm/Preview/2.png" alt="OFTerm 配色预设"><br><sub>配色预设</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="ofterm/Preview/3.png" alt="OFTerm 内置帮助"><br><sub>内置帮助</sub></td>
+    <td width="50%" align="center"><img src="ofterm/Preview/4.png" alt="OFTerm 浅色主题"><br><sub>浅色主题</sub></td>
+  </tr>
+</table>
 
 > **状态：预发布。** x86_64 与 arm64 安装包已经可以构建，但尚未提交或通过飞牛官方商店审核。首个稳定版前，界面与打包结构仍可能调整。
 
