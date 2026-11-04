@@ -11,8 +11,58 @@ permissions:
   contents: write
 
 jobs:
+  utils-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl,aarch64-unknown-linux-musl,armv7-unknown-linux-musleabihf
+
+      - name: Install cross linker
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build Linux utilities
+        env:
+          CLANG: clang
+        run: node scripts/build-utils.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: utils-linux
+          path: build/utils/ofterm-utils-linux-*
+          if-no-files-found: error
+
+  utils-darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build macOS utilities
+        run: node scripts/build-utils.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: utils-darwin
+          path: build/utils/ofterm-utils-darwin-*
+          if-no-files-found: error
+
   release:
     runs-on: ubuntu-latest
+    needs: [utils-linux, utils-darwin]
     steps:
       - uses: actions/checkout@v4
 
@@ -22,11 +72,9 @@ jobs:
           cache: npm
           cache-dependency-path: src/frontend/package-lock.json
 
-      - name: Build frontend
+      - name: Install frontend dependencies
         working-directory: src/frontend
-        run: |
-          npm ci
-          npm run build
+        run: npm ci
 
       - uses: actions/setup-go@v5
         with:
@@ -38,12 +86,20 @@ jobs:
           curl -fsSL -o /usr/local/bin/fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64
           chmod +x /usr/local/bin/fnpack
 
+      - name: Collect utilities binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'utils-*'
+          path: build/utils
+          merge-multiple: true
+
       - name: Build FPK (x86 + arm64)
         env:
           VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '1.0.0' }}
           FNPACK: fnpack
         run: |
           export VERSION="${VERSION#v}"
+          chmod +x build/utils/*
           node scripts/build-fpk.mjs --all
           (cd build/out && sha256sum *.fpk > SHA256SUMS)
 
@@ -71,7 +127,7 @@ jobs:
           for old in ofterm_x86.fpk ofterm_arm.fpk; do
             gh release delete-asset "$TAG" "$old" --yes 2>/dev/null || true
           done
-          gh release upload "$TAG" build/out/*.fpk build/out/SHA256SUMS --clobber
+          gh release upload "$TAG" build/out/*.fpk build/out/SHA256SUMS build/utils/ofterm-utils-* --clobber
 
       - name: Update FnDepot V2 index on main (tag builds)
         if: startsWith(github.ref, 'refs/tags/')

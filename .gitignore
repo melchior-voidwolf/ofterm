@@ -13,6 +13,9 @@ coverage/
 # Dependencies
 node_modules/
 vendor/
+utilities/target/
+/build/utils/
+src/frontend/public/utilities.b64
 
 # Local
 .DS_Store

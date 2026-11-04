@@ -21,6 +21,9 @@ license texts live in `licenses/`; the CI license gate is not implemented yet.
 | @xterm/xterm and addons | pinned in package-lock.json | MIT | Terminal emulator |
 | JetBrains Mono | @fontsource/jetbrains-mono | OFL-1.1 | Bundled monospace fallback |
 | iTerm2 imgcat | derived | GPL-2.0 | Inline image helper (contrib/imgcat), modified to downscale before transfer |
+| image (Rust) | pinned in utilities/Cargo.lock | MIT OR Apache-2.0 | Decoding and downscaling in the native utilities binary |
+| kamadak-exif (Rust) | pinned in utilities/Cargo.lock | BSD-2-Clause | EXIF orientation for phone photos |
+| libc (Rust) | pinned in utilities/Cargo.lock | MIT OR Apache-2.0 | Terminal window-size ioctl |
 
 ## Theme and color data
 
@@ -34,6 +37,7 @@ license texts live in `licenses/`; the CI license gate is not implemented yet.
 
 - The project itself is GPL-2.0-only; third-party runtime dependencies must be GPLv2-compatible (MIT/BSD/ISC/OFL).
 - `contrib/imgcat` is derived from iTerm2's imgcat (GPLv2), modified to downscale before transfer; `contrib/imgls` is an independent OFTerm implementation with an iTerm2-compatible command line.
+- The native `ofterm-utils` binary (Rust) is part of OFTerm and is licensed GPL-2.0-only like the rest of the project. Its dependencies are MIT/BSD-2-Clause/Apache-2.0 dual-licensed and therefore GPLv2-compatible.
 - No FntermX code, binaries, icons, screenshots, or other assets are reused.
 - Dependency licenses are restricted to the allowlist: GPL-2.0-only, MIT,
   BSD-2-Clause, BSD-3-Clause, ISC, OFL-1.1. The automated CI license gate is

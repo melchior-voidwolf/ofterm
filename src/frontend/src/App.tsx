@@ -18,7 +18,6 @@ import {
 } from './session/panes'
 import type { SessionClient, SessionStatus } from './session/SessionClient'
 import { blendHex, themeColors } from './theme'
-import { UTILITIES_BUNDLE } from './lib/utilities-bundle'
 import { randomId } from './lib/id'
 import { resolveLocale, setLocale, t } from './i18n'
 
@@ -377,18 +376,47 @@ function Workspace({ me }: { me: Me }) {
     return () => window.removeEventListener('keydown', onKeyDown, true)
   }, [activeClient, addTab, closeActivePane, settingsOpen, splitActive])
 
-  const installUtilities = useCallback(() => {
+  const installUtilities = useCallback(async () => {
     if (!activeClient) {
       setToast({ message: t('请先打开一个终端'), kind: 'info' })
       return
     }
-    const chunks = UTILITIES_BUNDLE.match(/.{1,800}/g) ?? []
-    const lines = [
+    // The archive is a static asset (public/utilities.b64) so it is fetched
+    // on demand instead of being embedded in the main bundle.
+    const base = document.baseURI.endsWith('/') ? document.baseURI : `${document.baseURI}/`
+    const response = await fetch(new URL('utilities.b64', base))
+    if (!response.ok) {
+      setToast({ message: t('辅助工具下载失败'), kind: 'error' })
+      return
+    }
+    const UTILITIES_BUNDLE = await response.text()
+    const chunks = UTILITIES_BUNDLE.match(/.{1,8000}/g) ?? []
+    const script = [
       'd="$HOME/.local/bin"; mkdir -p "$d"; f="$(mktemp)"',
       ...chunks.map((chunk) => `printf '%s' '${chunk}' >> "$f"`),
       'if command -v openssl >/dev/null 2>&1; then openssl base64 -d -A < "$f" | tar -xzf - -C "$d"; else base64 -d < "$f" | tar -xzf - -C "$d"; fi',
-      'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
       'rm -f "$f"',
+      'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
+      // Pick the native binary for this machine; anything else keeps the
+      // shell scripts, which work everywhere.
+      'os="$(uname -s 2>/dev/null)"; arch="$(uname -m 2>/dev/null)"',
+      'case "$os/$arch" in',
+      '  Linux/x86_64|Linux/amd64) b=ofterm-utils-linux-x86_64 ;;',
+      '  Linux/aarch64|Linux/arm64) b=ofterm-utils-linux-aarch64 ;;',
+      '  Linux/armv7l|Linux/armv71|Linux/armhf) b=ofterm-utils-linux-armv7 ;;',
+      '  Darwin/x86_64) b=ofterm-utils-darwin-x86_64 ;;',
+      '  Darwin/arm64) b=ofterm-utils-darwin-arm64 ;;',
+      '  *) b= ;;',
+      'esac',
+      'if [ -n "$b" ] && [ -f "$d/$b" ] && chmod +x "$d/$b" && "$d/$b" --selftest >/dev/null 2>&1; then',
+      '  rm -f "$d/imgcat" "$d/imgls"',
+      '  mv "$d/$b" "$d/ofterm-utils"',
+      '  ln -sf ofterm-utils "$d/imgcat"; ln -sf ofterm-utils "$d/imgls"',
+      '  printf "OFTerm utilities: native binary (%s/%s)\\n" "$os" "$arch"',
+      'else',
+      '  rm -f "$d"/ofterm-utils-*',
+      '  printf "OFTerm utilities: shell scripts (%s/%s)\\n" "$os" "$arch"',
+      'fi',
       'if [ -x "$d/ofn-check" ]; then',
       '  export PATH="$d:$PATH"',
       '  hash -r 2>/dev/null || true',
@@ -401,8 +429,19 @@ function Workspace({ me }: { me: Me }) {
       'else',
       '  printf "OFTerm utilities install failed\\n"',
       'fi',
-    ]
-    activeClient.runCommand(lines.join('\n'))
+    ].join('\n')
+    // The server caps inbound WebSocket frames at 1 MiB, and the archive is
+    // larger than that, so send whole lines in batches.
+    const batchLimit = 300_000
+    let batch = ''
+    for (const line of script.split('\n')) {
+      if (batch.length + line.length + 1 > batchLimit) {
+        activeClient.runCommand(batch)
+        batch = ''
+      }
+      batch += (batch ? '\n' : '') + line
+    }
+    if (batch) activeClient.runCommand(batch)
     setSettingsOpen(false)
     setToast({ message: t('辅助工具安装已启动'), kind: 'success' })
   }, [activeClient])

@@ -40,3 +40,33 @@ jobs:
           go test ./...
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o /tmp/ofterm-amd64 ./cmd/ofterm
           GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o /tmp/ofterm-arm64 ./cmd/ofterm
+
+  utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl,aarch64-unknown-linux-musl,armv7-unknown-linux-musleabihf
+
+      - name: Install cross linker
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests
+        working-directory: utilities
+        run: cargo test --release
+
+      - name: Build all Linux targets
+        env:
+          CLANG: clang
+        run: node scripts/build-utils.mjs
+
+      - name: Package smoke test
+        run: |
+          node scripts/build-utils-bundle.mjs all
+          ./build/utils/ofterm-utils-linux-x86_64 --selftest

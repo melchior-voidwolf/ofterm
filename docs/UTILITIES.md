@@ -4,7 +4,7 @@
 
 ## 一键安装
 
-OFTerm 的 Settings → Help 内置“在当前终端安装辅助工具”按钮：脚本以 base64 形式随应用分发，不依赖 GitHub，点击后在当前终端可见地执行。
+OFTerm 的 Settings → Help 内置“在当前终端安装辅助工具”按钮：安装包作为静态资源随应用分发（`utilities.b64`，不依赖 GitHub），点击后按当前终端所在机器的系统与 CPU 选择原生二进制，命令在当前终端可见地执行。
 
 也可以从 GitHub 下载安装：
 
@@ -33,11 +33,24 @@ PREFIX=/usr/local/bin FORCE=1 \
 | `ofn-title` | 设置标签标题 | OSC 0 |
 | `ofn-check` | 检查终端与辅助脚本能力 | OSC 9 / 52 |
 
+## 原生实现与回退
+
+`imgcat` / `imgls` 优先使用随应用分发的原生二进制 `ofterm-utils`（Rust，静态链接）：
+
+- 一个多调用二进制，按 `argv[0]` 分发；安装时创建 `imgcat` / `imgls` 符号链接。
+- 自带 PNG/JPEG/GIF/WebP/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。
+- 支持平台：Linux x86_64 / aarch64 / armv7，macOS x86_64 / arm64（静态 musl 构建，不挑发行版）。
+- 安装脚本用 `uname -s` / `uname -m` 精确选型，选中的文件先跑 `--selftest`；**任何不匹配或无法执行的情况自动回退到同目录下的 shell 脚本**，功能不受影响，只是大图缩图依赖 `sips`/ImageMagick。
+- 每个架构的安装包里只嵌入该架构的二进制，避免包体积翻倍。
+
 ## 尺寸与性能
 
-- `imgcat` 默认按当前终端尺寸缩图（取 `stty size`，约 10×20px/单元格，最长边上限 1600px），避免把 4000×3000 原图整包 base64 传给浏览器。可用 `--no-shrink` 或 `OFN_IMG_MAX_PX=0` 关闭。
-- `imgls` 默认按 20×10 单元格生成缩略图，最长边约 280px，并在文件名后显示像素尺寸（`--no-dimensions` 关闭）。实测同一目录从 72KB 降到 21KB。
-- 缩图依赖 `sips`（macOS）或 `magick`/`convert`（ImageMagick）；两者都没有时发送原始字节，功能不受影响。
+- `imgcat` 默认按当前终端尺寸缩图，避免把 4000×3000 原图整包 base64 传给浏览器。可用 `--no-shrink` 或 `OFN_IMG_MAX_PX=0` 关闭。
+- 原生实现会读取终端真实像素尺寸（`TIOCGWINSZ` 的 `ws_xpixel`）；拿不到时按 80×24 单元格估算。
+- EXIF 方向会被应用（手机照片不会躺倒）；动画 GIF/WebP **不缩图、原样透传**，保证动画不丢。
+- 传输前若仍超过约 6.8 MB，会进一步缩小或在无法缩小时报错，避免撞上前端 xterm 单条 OSC 10 MB 上限后“静默不显示”。
+- `imgls` 默认按 20×10 单元格生成缩略图，并在文件名后显示像素尺寸（`--no-dimensions` 关闭）。
+- 实测（180 个文件 / 195 MB 漫画目录）：原生实现 12.1 s / 29 MB 峰值内存，shell 版 27.9 s / 157 MB。
 - 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 - 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 

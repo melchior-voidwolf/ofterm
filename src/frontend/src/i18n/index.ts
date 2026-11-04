@@ -44,6 +44,7 @@ const enUS: Record<string, string> = {
   没有打开的标签: 'No open tabs',
   请先打开一个终端: 'Open a terminal first',
   辅助工具安装已启动: 'Utility installation started',
+  辅助工具下载失败: 'Could not download the utilities archive',
   // Session status
   连接中: 'Connecting',
   已连接: 'Connected',

@@ -1,10 +1,12 @@
 # OFTerm Utilities
 
-`imgcat` / `imgls` 在 iTerm2 版本的基础上扩展（默认按终端尺寸缩图、显示图片像素尺寸），`ofn-*` 是 OFTerm 的轻量辅助脚本。一键安装：
+`imgcat` / `imgls` 默认由随应用分发的原生二进制 `ofterm-utils`（Rust，静态链接）提供，自带图像解码与缩放，不依赖 ImageMagick/sips；不支持的平台会自动回退到本目录的 shell 实现。`ofn-*` 是 OFTerm 的轻量辅助脚本。一键安装：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | bash
 ```
+
+安装脚本按 `uname -s/-m` 选择 Linux x86_64 / aarch64 / armv7 或 macOS x86_64 / arm64 的二进制，并执行 `--selftest`；失败则安装 shell 版本。
 
 完整说明见 `docs/UTILITIES.md`。
 
