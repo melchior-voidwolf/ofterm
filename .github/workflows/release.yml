@@ -72,3 +72,20 @@ jobs:
             gh release delete-asset "$TAG" "$old" --yes 2>/dev/null || true
           done
           gh release upload "$TAG" build/out/*.fpk build/out/SHA256SUMS --clobber
+
+      - name: Update FnDepot V2 index on main (tag builds)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          export VERSION="${VERSION#v}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B main origin/main
+          # build/out is untracked, so the artifacts survive the checkout and
+          # the index is generated from the exact bytes just published.
+          node scripts/gen-fnpack-v2.mjs
+          git add fnpack.json
+          git commit -m "chore(fnpack): index v$VERSION" || echo "index unchanged"
+          git push origin main
