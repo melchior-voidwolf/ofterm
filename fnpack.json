@@ -5,7 +5,7 @@
       "x86",
       "arm"
     ],
-    "version": "0.1.2-dev",
+    "version": "0.1.3-dev",
     "desc": "面向飞牛 fnOS 的开源终端应用，iTerm2 风格界面与设置，提供本地 Shell。",
     "labels": "工具,终端,效率",
     "distributor": "OFTerm Contributors",
@@ -15,15 +15,15 @@
     "isdocker": "false",
     "size": "3.6",
     "download_url": "",
-    "changelog": "新增一键安装辅助工具；修复远程网关 Origin 校验。",
+    "changelog": "辅助工具改为应用内置离线安装；新增一键安装按钮；修复远程网关 Origin 校验。",
     "arch_diff": {
       "x86": {
         "size": "3.5",
-        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk?v=0.1.2-dev"
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_x86.fpk?v=0.1.3-dev"
       },
       "arm": {
         "size": "3.2",
-        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk?v=0.1.2-dev"
+        "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_arm.fpk?v=0.1.3-dev"
       }
     }
   }

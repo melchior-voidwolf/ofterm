@@ -15,6 +15,7 @@ import {
 } from './session/panes'
 import type { SessionClient, SessionStatus } from './session/SessionClient'
 import { blendHex, themeColors } from './theme'
+import { UTILITIES_BUNDLE } from './lib/utilities-bundle'
 
 interface Me {
   authenticated: boolean
@@ -356,9 +357,18 @@ function Workspace({ me }: { me: Me }) {
       setToast({ message: '请先打开一个终端', kind: 'info' })
       return
     }
-    activeClient.runCommand('curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash')
+    const chunks = UTILITIES_BUNDLE.match(/.{1,800}/g) ?? []
+    const lines = [
+      'd="$HOME/.local/bin"; mkdir -p "$d"; f="$(mktemp)"',
+      ...chunks.map((chunk) => `printf '%s' '${chunk}' >> "$f"`),
+      'if command -v openssl >/dev/null 2>&1; then openssl base64 -d -A < "$f" | tar -xzf - -C "$d"; else base64 -d < "$f" | tar -xzf - -C "$d"; fi',
+      'chmod +x "$d"/imgcat "$d"/imgls "$d"/ofn-imgcat "$d"/ofn-imgls "$d"/ofn-copy "$d"/ofn-notify "$d"/ofn-dl "$d"/ofn-title "$d"/ofn-check',
+      'rm -f "$f"',
+      'printf "OFTerm utilities installed in %s\\n" "$d"',
+    ]
+    activeClient.runCommand(lines.join('\n'))
     setSettingsOpen(false)
-    setToast({ message: '已在终端中执行辅助工具安装', kind: 'success' })
+    setToast({ message: '正在从内置脚本安装辅助工具', kind: 'success' })
   }, [activeClient])
 
   const closeSearch = () => {

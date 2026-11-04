@@ -2,7 +2,11 @@
 
 类似 [iTerm2 Utilities](https://iterm2.com/documentation-utilities.html)，但面向 OFTerm 的浏览器终端。所有脚本通过 OSC 序列工作，可运行在本地 Shell 或任意 SSH 主机上。
 
-## 一键安装（默认从 GitHub 下载）
+## 一键安装
+
+OFTerm 的 Settings → Help 内置“在当前终端安装辅助工具”按钮：脚本以 base64 形式随应用分发，不依赖 GitHub，点击后在当前终端可见地执行。
+
+也可以从 GitHub 下载安装：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | bash
