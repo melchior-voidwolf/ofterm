@@ -131,9 +131,9 @@ docs/                        architecture, security, privacy, compatibility
 
 ## Download
 
-- **Release branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.6-dev_x86.fpk
-- **Release branch build (ARM):** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.6-dev_arm.fpk
-- **Stable release:** after a `v*` tag, use `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_0.1.6-dev_x86.fpk` (or `ofterm_0.1.6-dev_arm.fpk`).
+- **Release branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.7-dev_x86.fpk
+- **Release branch build (ARM):** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_0.1.7-dev_arm.fpk
+- **Stable release:** after a `v*` tag, use `https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_0.1.7-dev_x86.fpk` (or `ofterm_0.1.7-dev_arm.fpk`).
 
 `fnpack.json` points at the stable release; prerelease builds use the `release` tag explicitly.
 
@@ -158,7 +158,7 @@ chmod +x /tmp/fnpack
 FNPACK=/tmp/fnpack VERSION=0.1.0 node scripts/build-fpk.mjs --all
 ```
 
-Artifacts are written to `build/out/ofterm_0.1.6-dev_x86.fpk` and `build/out/ofterm_0.1.6-dev_arm.fpk`.
+Artifacts are written to `build/out/ofterm_0.1.7-dev_x86.fpk` and `build/out/ofterm_0.1.7-dev_arm.fpk`.
 
 Local development:
 
@@ -172,7 +172,7 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 - `.github/workflows/ci.yml` runs on `main`/`master`/PRs: frontend tests/build, backend vet/tests, and linux cross-compilation. It does not publish packages.
 - `.github/workflows/release.yml` runs on the `release` branch and on `v*` tags. Pushes to `release` publish a rolling prerelease (tag `release`); tags publish a stable release.
-- Both channels attach `ofterm_0.1.6-dev_x86.fpk`, `ofterm_0.1.6-dev_arm.fpk`, and `SHA256SUMS`.
+- Both channels attach `ofterm_0.1.7-dev_x86.fpk`, `ofterm_0.1.7-dev_arm.fpk`, and `SHA256SUMS`.
 - `build/architectures.json` is the only architecture source. Adding a Go-supported target does not require backend changes.
 
 ## Security and privacy
