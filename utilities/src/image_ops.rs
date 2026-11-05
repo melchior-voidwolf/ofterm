@@ -6,6 +6,7 @@
 // smaller than the original.
 
 use std::io::Cursor;
+use std::path::Path;
 
 use image::codecs::jpeg::JpegEncoder;
 use image::imageops::FilterType;
@@ -25,6 +26,16 @@ pub fn dimensions(data: &[u8]) -> Option<(u32, u32)> {
         return None;
     }
     let reader = ImageReader::with_format(Cursor::new(data), format);
+    reader.into_dimensions().ok()
+}
+
+/// The same header-only probe without reading the whole file into memory.
+pub fn dimensions_file(path: &Path) -> Option<(u32, u32)> {
+    let reader = ImageReader::open(path).ok()?.with_guessed_format().ok()?;
+    let format = reader.format()?;
+    if !is_image_format(format) {
+        return None;
+    }
     reader.into_dimensions().ok()
 }
 

@@ -16,6 +16,33 @@ pub fn is_tty(fd: RawFd) -> bool {
     unsafe { libc::isatty(fd) == 1 }
 }
 
+fn output_winsize() -> Option<libc::winsize> {
+    winsize(libc::STDOUT_FILENO).or_else(|| winsize(libc::STDIN_FILENO))
+}
+
+/// Terminal width in character cells. Piped output uses the conventional
+/// 80-column layout; callers can still override their thumbnail width.
+pub fn columns() -> u32 {
+    output_winsize()
+        .map(|ws| ws.ws_col as u32)
+        .filter(|&cols| cols > 0)
+        .unwrap_or(80)
+}
+
+/// Pixel dimensions of one terminal cell, used only to estimate how many rows
+/// an aspect-preserved thumbnail will occupy. OFTerm's PTY normally reports
+/// cells only, so the same 10x20 estimate as imgcat is the fallback.
+pub fn cell_pixels() -> (u32, u32) {
+    if let Some(ws) = output_winsize() {
+        let (cols, rows) = (ws.ws_col as u32, ws.ws_row as u32);
+        let (w, h) = (ws.ws_xpixel as u32, ws.ws_ypixel as u32);
+        if cols > 0 && rows > 0 && w >= cols && h >= rows {
+            return ((w / cols).max(1), (h / rows).max(1));
+        }
+    }
+    (10, 20)
+}
+
 /// Pixel budget for downscaling before transfer.
 ///
 /// `OFN_IMG_MAX_PX` wins when set (0 disables downscaling). Otherwise use the

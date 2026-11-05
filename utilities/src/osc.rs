@@ -87,8 +87,34 @@ impl Params<'_> {
         h
     }
 
-    /// Emit an in-memory payload.
-    pub fn write_slice<W: Write>(&self, w: &mut W, framing: Framing, data: &[u8]) -> io::Result<()> {
+    /// Emit an in-memory payload followed by a newline.
+    pub fn write_slice<W: Write>(
+        &self,
+        w: &mut W,
+        framing: Framing,
+        data: &[u8],
+    ) -> io::Result<()> {
+        self.write_slice_impl(w, framing, data, true)
+    }
+
+    /// Emit an in-memory payload without moving to the next line. imgls uses
+    /// this with DECSC/DECRC to place several thumbnails on one grid row.
+    pub fn write_slice_inline<W: Write>(
+        &self,
+        w: &mut W,
+        framing: Framing,
+        data: &[u8],
+    ) -> io::Result<()> {
+        self.write_slice_impl(w, framing, data, false)
+    }
+
+    fn write_slice_impl<W: Write>(
+        &self,
+        w: &mut W,
+        framing: Framing,
+        data: &[u8],
+        newline: bool,
+    ) -> io::Result<()> {
         if self.legacy {
             framing.sequence_start(w)?;
             w.write_all(&self.header())?;
@@ -102,7 +128,10 @@ impl Params<'_> {
             }
             framing.sequence(w, b"FileEnd")?;
         }
-        w.write_all(b"\n")
+        if newline {
+            w.write_all(b"\n")?;
+        }
+        Ok(())
     }
 
     /// Emit a payload read from `reader`, in constant memory.

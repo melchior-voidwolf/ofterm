@@ -6,7 +6,9 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -34,6 +36,27 @@ func defaultShell() string {
 		}
 	}
 	return "/bin/sh"
+}
+
+// utf8Locale appends a UTF-8 locale when the process environment has none.
+// Service managers (fnOS included) usually start the app with an empty
+// environment, which leaves the shell in the C locale: readline then renders
+// UTF-8 filenames as \M-f escapes and iconv prints "Error converting string
+// from ANSI_X3.4-1968 to UTF-8". An explicitly configured locale is always
+// respected.
+func utf8Locale(env []string) []string {
+	for _, entry := range env {
+		for _, key := range []string{"LC_ALL", "LC_CTYPE", "LANG"} {
+			if strings.HasPrefix(entry, key+"=") && len(entry) > len(key)+1 {
+				return env
+			}
+		}
+	}
+	locale := "C.UTF-8"
+	if runtime.GOOS == "darwin" {
+		locale = "en_US.UTF-8" // macOS has no C.UTF-8
+	}
+	return append(env, "LANG="+locale, "LC_CTYPE="+locale)
 }
 
 func resolveShell(requested string) (string, error) {
@@ -137,12 +160,12 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 		return nil, err
 	}
 	cmd := exec.Command(shell, "-l")
-	cmd.Env = append(os.Environ(),
+	cmd.Env = utf8Locale(append(os.Environ(),
 		"TERM=xterm-256color",
 		"COLORTERM=truecolor",
 		"OFTERM=1",
 		"OFTERM_SESSION="+id,
-	)
+	))
 	home := ""
 	if target != nil {
 		cmd.Env = append(cmd.Env,

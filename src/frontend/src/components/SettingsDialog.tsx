@@ -267,7 +267,7 @@ function HelpZh({ onInstallUtilities }: { onInstallUtilities: () => void }) {
 
       <section className="help-section">
         <h4>图片与实用工具</h4>
-        <p>支持 iTerm2 的 OSC 1337 内联图片协议、Sixel，以及 OSC 52 剪贴板、OSC 9 通知和文件下载。安装使用应用内置脚本，不依赖 GitHub；命令会在当前终端中可见地执行。</p>
+        <p>支持 iTerm2 的 OSC 1337 内联图片协议、Sixel，以及 OSC 52 剪贴板、OSC 9 通知和文件下载。命令会在当前终端中可见地执行：先安装内置的 shell 脚本，再按当前机器的架构从 GitHub Releases 下载原生二进制（无法访问时自动回退 shell 版）。</p>
         <div className="help-actions">
           <button className="primary-button" onClick={onInstallUtilities}>
             在当前终端安装辅助工具
@@ -277,7 +277,7 @@ function HelpZh({ onInstallUtilities }: { onInstallUtilities: () => void }) {
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash</pre>
         <ul>
           <li><code>imgcat</code>：在终端内显示图片，默认按窗口尺寸缩图（<code>--no-shrink</code> 发送原图）。</li>
-          <li><code>imgls</code>：带缩略图与像素尺寸的目录列表。</li>
+          <li><code>imgls</code>：自适应多列缩略图网格，文件名与像素尺寸显示在图片下方。</li>
           <li><code>ofn-copy</code>、<code>ofn-notify</code>、<code>ofn-dl</code>、<code>ofn-title</code>：剪贴板、通知、下载与标题。</li>
         </ul>
       </section>
@@ -339,7 +339,7 @@ function HelpEn({ onInstallUtilities }: { onInstallUtilities: () => void }) {
 
       <section className="help-section">
         <h4>Images &amp; Utilities</h4>
-        <p>Supports the iTerm2 OSC 1337 inline-image protocol, Sixel, OSC 52 clipboard, OSC 9 notifications, and file download. Utilities install from a script embedded in the app — no GitHub access required; the commands run visibly in the current terminal.</p>
+        <p>Supports the iTerm2 OSC 1337 inline-image protocol, Sixel, OSC 52 clipboard, OSC 9 notifications, and file download. The commands run visibly in the current terminal: the embedded shell helpers install first, then the native binary for this machine's architecture is downloaded from GitHub Releases (falling back to the shell version when GitHub is unreachable).</p>
         <div className="help-actions">
           <button className="primary-button" onClick={onInstallUtilities}>
             Install utilities in current terminal
@@ -349,7 +349,7 @@ function HelpEn({ onInstallUtilities }: { onInstallUtilities: () => void }) {
 curl -fsSL https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/contrib/install-utils.sh | FORCE=1 bash</pre>
         <ul>
           <li><code>imgcat</code>: display images in the terminal; downscales to fit the window by default (<code>--no-shrink</code> sends the original).</li>
-          <li><code>imgls</code>: directory listing with thumbnails and pixel dimensions.</li>
+          <li><code>imgls</code>: adaptive multi-column thumbnail grid with filenames and pixel dimensions under each image.</li>
           <li><code>ofn-copy</code>, <code>ofn-notify</code>, <code>ofn-dl</code>, <code>ofn-title</code>: clipboard, notification, download, and title.</li>
         </ul>
       </section>

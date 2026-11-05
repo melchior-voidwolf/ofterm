@@ -3,8 +3,8 @@
 
 mod base64;
 mod image_ops;
-mod imgls;
 mod imgcat;
+mod imgls;
 mod osc;
 mod term;
 

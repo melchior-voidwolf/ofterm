@@ -63,7 +63,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 | 命令 | 用途 |
 |---|---|
 | `imgcat` | 原生实现（Rust）或 shell；传输前按终端尺寸缩图 |
-| `imgls` | 原生实现（Rust）或 shell：缩略图 + 像素尺寸 |
+| `imgls` | 原生实现（Rust）或 shell：自适应多列缩略图网格，文件名在图片下方 |
 | `ofn-copy` | OSC 52 剪贴板 |
 | `ofn-notify` | OSC 9 通知 |
 | `ofn-dl` | 从 Shell 下载文件到浏览器 |

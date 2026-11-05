@@ -65,7 +65,7 @@ OFTerm is built around three constraints:
 | Command | Purpose |
 |---|---|
 | `imgcat` | Native (Rust) or shell; downscales before transfer |
-| `imgls` | Native (Rust) or shell; thumbnails plus pixel dimensions |
+| `imgls` | Native (Rust) or shell; adaptive thumbnail grid with filenames under each image |
 | `ofn-copy` | OSC 52 clipboard |
 | `ofn-notify` | OSC 9 notification |
 | `ofn-dl` | Download a file from the shell to the browser |
