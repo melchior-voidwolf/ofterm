@@ -58,7 +58,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 ### 辅助脚本
 
-`contrib/` 提供与 iTerm2 Utilities 兼容的工具集。`imgcat`/`imgls` 由自研 Rust 二进制（`utilities/`）提供：不依赖 ImageMagick/sips，自动处理 EXIF 方向，动画图片原样保留，并在传输前按终端尺寸缩图。每个安装包都内置五个预编译产物——Linux x86_64/aarch64/armv7 与 macOS x86_64/arm64——因此即使是在 SSH 到另一台机器的会话里安装也能选到匹配版本；不匹配时自动回退到 shell 实现。
+`contrib/` 提供与 iTerm2 Utilities 兼容的工具集。`imgcat`/`imgls` 由自研 Rust 二进制（`utilities/`）提供：不依赖 ImageMagick/sips，自动处理 EXIF 方向，动画图片原样保留，并在传输前按终端尺寸缩图。预编译产物覆盖 Linux x86_64/aarch64/armv7 与 macOS x86_64/arm64 五个平台，安装时按当前机器从 GitHub Releases 下载匹配版本——即使是在 SSH 到另一台机器的会话里也能选到正确架构；下载失败或不匹配时自动回退到 shell 实现。
 
 | 命令 | 用途 |
 |---|---|
@@ -79,7 +79,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 - **细节正确**：应用 EXIF 方向（手机照片不会躺倒）；动画 GIF/WebP 原样透传；缩图结果只有在确实更小时才采用。
 - **不会静默失败**：接近终端 1000 万字符的 OSC 上限时会逐级缩小，实在放不下则明确报错，而不是让图片悄悄消失。
 - **快且省内存**：整个目录单进程处理，base64 流式输出，内存占用基本恒定。
-- **到处能装**：每个安装包内置五个二进制（Linux x86_64/aarch64/armv7、macOS x86_64/arm64）。安装时用 `uname` + `--selftest` 选型，跑不起来自动回退 shell 脚本。
+- **到处能装**：预编译产物覆盖五个平台（Linux x86_64/aarch64/armv7、macOS x86_64/arm64）。安装时用 `uname` 选型、从 GitHub Releases 下载并 `--selftest` 验证，下载不了或跑不起来自动回退 shell 脚本。
 
 实测（180 个文件 / 195 MB 漫画目录）：
 

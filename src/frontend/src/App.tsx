@@ -382,8 +382,9 @@ function Workspace({ me }: { me: Me }) {
       setToast({ message: t('请先打开一个终端'), kind: 'info' })
       return
     }
-    // The archive is a static asset (public/utilities.b64) so it is fetched
-    // on demand instead of being embedded in the main bundle.
+    // The shell helpers are a static asset (public/utilities.b64) fetched on
+    // demand; the script it builds downloads the native binary from GitHub
+    // Releases on the remote host instead of injecting it through the PTY.
     const base = document.baseURI.endsWith('/') ? document.baseURI : `${document.baseURI}/`
     const response = await fetch(new URL('utilities.b64', base))
     if (!response.ok) {
@@ -391,7 +392,6 @@ function Workspace({ me }: { me: Me }) {
       return
     }
     const UTILITIES_BUNDLE = await response.text()
-    // Sent in sub-1 MiB batches to respect the server's inbound frame limit.
     for (const batch of batchScript(buildInstallLines(UTILITIES_BUNDLE))) {
       activeClient.runCommand(batch)
     }

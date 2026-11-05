@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { batchScript, buildInstallLines, INSTALL_BATCH_LIMIT } from './install-command'
+import { batchScript, buildInstallLines, INSTALL_BATCH_LIMIT, UTILS_RELEASE_BASE } from './install-command'
 
 const bundle = 'QUJD'.repeat(2500) // ~10 KB of fake base64
 
@@ -14,7 +14,7 @@ describe('install command', () => {
     expect(printed.join('')).toBe(bundle)
   })
 
-  it('maps every supported uname pair to a bundled binary', () => {
+  it('maps every supported uname pair to a release binary', () => {
     const script = buildInstallLines(bundle).join('\n')
     for (const name of [
       'ofterm-utils-linux-x86_64',
@@ -27,6 +27,22 @@ describe('install command', () => {
     }
     expect(script).toContain('--selftest')
     expect(script).toContain('shell scripts')
+  })
+
+  it('downloads the native binary from GitHub Releases with curl or wget', () => {
+    const script = buildInstallLines(bundle).join('\n')
+    expect(script).toContain(UTILS_RELEASE_BASE)
+    expect(script).toContain('curl -fsSL')
+    expect(script).toContain('wget -q')
+    // Download artifacts must not be executed before passing the selftest.
+    const download = script.indexOf('curl -fsSL')
+    const selftest = script.indexOf('--selftest')
+    const symlink = script.indexOf('ln -sf ofterm-utils')
+    expect(download).toBeGreaterThan(-1)
+    expect(selftest).toBeGreaterThan(download)
+    expect(symlink).toBeGreaterThan(selftest)
+    // Older bundle-based installs left per-arch binaries behind; clean them.
+    expect(script).toContain('rm -f "$d"/ofterm-utils-linux-*')
   })
 
   it('keeps every batch under the frame limit and on line boundaries', () => {

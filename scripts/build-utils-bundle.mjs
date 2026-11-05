@@ -5,16 +5,17 @@ import { fileURLToPath } from 'node:url'
 
 // Build the utilities archive that the app installs into the user's shell.
 //
-// Contents: the shell helpers plus the native binary for every supported
-// platform. The installer picks the matching binary, runs `--selftest`, and
-// falls back to the shell scripts when it cannot execute. Everything ships in
-// every package because the install runs in whatever shell the user has open —
-// often an SSH session on a different machine (Raspberry Pi, x86 server, Mac).
+// Contents: the shell helpers only. Typing a multi-MB base64 archive into a
+// PTY is very slow, so the native binary is no longer embedded — the install
+// command downloads the matching `ofterm-utils-*` build from GitHub Releases
+// and falls back to the shell scripts when the download or `--selftest`
+// fails. Pass explicit architectures to opt back into embedding binaries
+// (e.g. for an offline bundle).
 //
 // Usage: node scripts/build-utils-bundle.mjs [arch ...]
 //   arch ∈ x86, arm (fnOS names), or a full suffix such as linux-x86_64,
 //   linux-aarch64, linux-armv7, linux-armv6, darwin-x86_64, darwin-arm64.
-//   Default: everything available under build/utils.
+//   Default: shell scripts only, no binaries.
 //
 // Binaries are produced by scripts/build-utils.mjs; run that first.
 
@@ -45,7 +46,7 @@ const wanted = requested.flatMap((arg) => {
   }
   return [resolved]
 })
-const binaries = (wanted.length ? [...new Set(wanted)] : defaults).map((name) => `ofterm-utils-${name}`)
+const binaries = [...new Set(wanted)].map((name) => `ofterm-utils-${name}`)
 
 const binDir = join(root, 'build/utils')
 const staging = mkdtempSync(join(root, 'build/utils-bundle-'))
@@ -77,7 +78,7 @@ try {
   mkdirSync(dirname(out), { recursive: true })
   writeFileSync(out, base64)
   console.log(
-    `bundle [${binaries.join(', ')}]: ${archive.length} bytes gz, ${base64.length} base64 chars -> ${out}`,
+    `bundle [${binaries.length ? binaries.join(', ') : 'shell scripts only'}]: ${archive.length} bytes gz, ${base64.length} base64 chars -> ${out}`,
   )
 } finally {
   rmSync(staging, { recursive: true, force: true })

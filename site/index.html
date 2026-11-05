@@ -168,7 +168,7 @@
           <li data-i18n="f-inline-2"><strong>只传缩略图</strong>：传输前按窗口尺寸缩图，十几 MB 的原图变成几十 KB，ssh 也不再卡顿。</li>
           <li data-i18n="f-inline-3"><strong>细节正确</strong>：手机照片按 EXIF 方向显示，动画 GIF / WebP 原样透传，不会被压成静态图。</li>
           <li data-i18n="f-inline-4"><strong>不会静默失败</strong>：接近终端协议上限时自动继续缩小，实在放不下会明确报错，而不是让图片悄悄消失。</li>
-          <li data-i18n="f-inline-5"><strong>到处能装</strong>：安装包内置 Linux x86_64 / aarch64 / armv7 与 macOS x86_64 / arm64 五个二进制，SSH 到树莓派或 x64 服务器会自动选型；不匹配时回退 shell 版本。</li>
+          <li data-i18n="f-inline-5"><strong>到处能装</strong>：预编译产物覆盖 Linux x86_64 / aarch64 / armv7 与 macOS x86_64 / arm64 五个平台，安装时按当前机器自动选型下载，SSH 到树莓派或 x64 服务器也一样；下载失败时回退 shell 版本。</li>
         </ul>
         <img class="shot" src="img/5.png" alt="Inline images with imgls and imgcat">
       </div>
@@ -243,7 +243,7 @@
       'f-inline-2': '<strong>Thumbnails only</strong>: images are downscaled to the window before transfer, so a 12 MB photo becomes tens of KB and ssh stays smooth.',
       'f-inline-3': '<strong>Correct details</strong>: phone photos honor EXIF orientation, and animated GIF/WebP are passed through untouched instead of being flattened.',
       'f-inline-4': '<strong>No silent failures</strong>: when an image approaches the terminal protocol limit it keeps shrinking, and reports a clear error instead of letting the image vanish.',
-      'f-inline-5': '<strong>Installs anywhere</strong>: five binaries ship in every package (Linux x86_64/aarch64/armv7, macOS x86_64/arm64); SSH into a Raspberry Pi or an x64 server picks the right one, otherwise it falls back to the shell version.',
+      'f-inline-5': '<strong>Installs anywhere</strong>: prebuilt binaries cover five platforms (Linux x86_64/aarch64/armv7, macOS x86_64/arm64) and the installer downloads the right one for the current machine — SSH into a Raspberry Pi or an x64 server works the same; if the download fails it falls back to the shell version.',
       'f-titles': 'Tab Titles Follow the Foreground Job',
       'f-titles-body': 'A tab is no longer called “Shell” forever — it shows what is actually running: vim while you edit, ssh while you are away, htop while you watch. Shell-integration (OSC) titles are honored too; the freshest title always wins.',
       'f-colors': 'Classic Color Presets',

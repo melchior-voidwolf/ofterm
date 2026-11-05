@@ -4,7 +4,7 @@
 
 ## 一键安装
 
-OFTerm 的 Settings → Help 内置“在当前终端安装辅助工具”按钮：安装包作为静态资源随应用分发（`utilities.b64`，不依赖 GitHub），点击后按当前终端所在机器的系统与 CPU 选择原生二进制，命令在当前终端可见地执行。
+OFTerm 的 Settings → Help 内置“在当前终端安装辅助工具”按钮：shell 脚本作为静态资源随应用分发（`utilities.b64`），点击后命令在当前终端可见地执行——先安装脚本，再按当前终端所在机器的系统与 CPU 从 GitHub Releases 下载匹配的原生二进制并以 `--selftest` 验证；下载失败或不匹配时保留 shell 实现，功能不受影响。
 
 也可以从 GitHub 下载安装：
 
@@ -35,13 +35,13 @@ PREFIX=/usr/local/bin FORCE=1 \
 
 ## 原生实现与回退
 
-`imgcat` / `imgls` 优先使用随应用分发的原生二进制 `ofterm-utils`（Rust，静态链接）：
+`imgcat` / `imgls` 优先使用原生二进制 `ofterm-utils`（Rust，静态链接），由安装命令从 GitHub Releases 按架构下载：
 
 - 一个多调用二进制，按 `argv[0]` 分发；安装时创建 `imgcat` / `imgls` 符号链接。
 - 自带 PNG/JPEG/GIF/WebP/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。
 - 支持平台：Linux x86_64 / aarch64 / armv7，macOS x86_64 / arm64（静态 musl 构建，不挑发行版）。
-- 安装脚本用 `uname -s` / `uname -m` 精确选型，选中的文件先跑 `--selftest`；**任何不匹配或无法执行的情况自动回退到同目录下的 shell 脚本**，功能不受影响，只是大图缩图依赖 `sips`/ImageMagick。
-- 每个架构的安装包里只嵌入该架构的二进制，避免包体积翻倍。
+- 安装脚本用 `uname -s` / `uname -m` 精确选型，下载后先跑 `--selftest`；**下载失败、不匹配或无法执行时自动回退到同目录下的 shell 脚本**，功能不受影响，只是大图缩图依赖 `sips`/ImageMagick。
+- 二进制不嵌入安装包（注入终端太慢），随 GitHub Release 独立分发，应用内安装与 `contrib/install-utils.sh` 使用同一下载地址。
 
 ## 尺寸与性能
 
@@ -51,7 +51,6 @@ PREFIX=/usr/local/bin FORCE=1 \
 - 传输前若仍超过约 6.8 MB，会进一步缩小或在无法缩小时报错，避免撞上前端 xterm 单条 OSC 10 MB 上限后“静默不显示”。
 - `imgls` 默认按 20×10 单元格生成缩略图，并在文件名后显示像素尺寸（`--no-dimensions` 关闭）。
 - 实测（180 个文件 / 195 MB 漫画目录）：原生实现 12.1 s / 29 MB 峰值内存，shell 版 27.9 s / 157 MB。
-- 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 - 后端会把 PTY 输出按 8ms/64KB 合并为更少的 WebSocket 帧，图片和大量日志都不会逐字符排队。
 
 ## 示例

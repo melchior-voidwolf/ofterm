@@ -60,7 +60,7 @@ OFTerm is built around three constraints:
 
 ### Utilities
 
-`contrib/` contains an iTerm2-compatible utility set. `imgcat`/`imgls` ship as a self-developed Rust binary (`utilities/`): no ImageMagick or sips needed, EXIF orientation handled, animated images preserved, and downscaling happens before transfer. Five prebuilt binaries — Linux x86_64/aarch64/armv7 and macOS x86_64/arm64 — are bundled in every package, so the installer works even inside an SSH session to another machine; anything unmatched falls back to the shell scripts.
+`contrib/` contains an iTerm2-compatible utility set. `imgcat`/`imgls` ship as a self-developed Rust binary (`utilities/`): no ImageMagick or sips needed, EXIF orientation handled, animated images preserved, and downscaling happens before transfer. Prebuilt binaries cover five platforms — Linux x86_64/aarch64/armv7 and macOS x86_64/arm64 — and the installer downloads the matching one from GitHub Releases, so it picks the right architecture even inside an SSH session to another machine; if the download fails or nothing matches, it falls back to the shell scripts.
 
 | Command | Purpose |
 |---|---|
@@ -81,7 +81,7 @@ OFTerm is built around three constraints:
 - **Correct details** — EXIF orientation applied (phone photos are not sideways); animated GIF/WebP passed through untouched; the downscaled copy is only used when it is actually smaller.
 - **No silent failures** — output approaches the terminal's 10M-character OSC limit only after progressive shrinking, and an oversized image produces a clear error instead of vanishing.
 - **Fast and frugal** — one process for a whole directory, constant-memory base64 streaming.
-- **Installs anywhere** — five binaries ship in every package (Linux x86_64/aarch64/armv7, macOS x86_64/arm64). The installer picks the matching one with `uname` + `--selftest` and falls back to the shell scripts if it cannot run.
+- **Installs anywhere** — prebuilt binaries cover five platforms (Linux x86_64/aarch64/armv7, macOS x86_64/arm64). The installer picks one with `uname`, downloads it from GitHub Releases, verifies it with `--selftest`, and falls back to the shell scripts if it cannot run.
 
 Measured on a 180-file / 195 MB manga directory:
 
