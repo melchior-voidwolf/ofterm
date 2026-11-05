@@ -72,6 +72,24 @@ OFTerm is built around three constraints:
 | `ofn-title` | Set the tab title |
 | `ofn-check` | Capability probe |
 
+#### Native Rust image utilities
+
+`imgcat` and `imgls` are a self-developed Rust binary (`utilities/`, GPL-2.0) rather than scripts wrapping an external tool. It ships with the app and needs nothing installed on the target machine.
+
+- **Zero dependencies** — PNG, JPEG, GIF, WebP, BMP, TIFF, ICO, PNM, TGA, DDS, HDR, QOI and EXR decoded in-process.
+- **Thumbnails before transfer** — images are downscaled to the terminal's pixel size, so a 12 MB photo costs tens of KB on the wire instead of megabytes.
+- **Correct details** — EXIF orientation applied (phone photos are not sideways); animated GIF/WebP passed through untouched; the downscaled copy is only used when it is actually smaller.
+- **No silent failures** — output approaches the terminal's 10M-character OSC limit only after progressive shrinking, and an oversized image produces a clear error instead of vanishing.
+- **Fast and frugal** — one process for a whole directory, constant-memory base64 streaming.
+- **Installs anywhere** — five binaries ship in every package (Linux x86_64/aarch64/armv7, macOS x86_64/arm64). The installer picks the matching one with `uname` + `--selftest` and falls back to the shell scripts if it cannot run.
+
+Measured on a 180-file / 195 MB manga directory:
+
+| Platform | Native | Shell fallback |
+|---|---|---|
+| Linux x86_64 | 12.1 s, 29 MB peak RSS | 27.9 s, 157 MB |
+| macOS arm64 | 5.4 s, 53 MB peak RSS | 23.6 s, 93 MB |
+
 Install from GitHub:
 
 ```bash
