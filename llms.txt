@@ -1,0 +1,42 @@
+# OFTerm
+
+> OFTerm (Open Fn Terminal) is an open-source, iTerm2-style terminal for fnOS
+> (飞牛 NAS). It provides tabs, split panes, inline images (imgcat/imgls),
+> classic color presets, and a bilingual Chinese/English UI, backed by a single
+> Go static binary and an xterm.js frontend.
+
+## Links
+
+- Homepage: https://melchior-voidwolf.github.io/ofterm/
+- Source code: https://github.com/melchior-voidwolf/ofterm
+- Releases: https://github.com/melchior-voidwolf/ofterm/releases
+- Issue tracker: https://github.com/melchior-voidwolf/ofterm/issues
+- Documentation: https://github.com/melchior-voidwolf/ofterm/tree/main/docs
+- Utilities (imgcat/imgls): https://github.com/melchior-voidwolf/ofterm/blob/main/docs/UTILITIES.md
+- Privacy: https://github.com/melchior-voidwolf/ofterm/blob/main/docs/PRIVACY.md
+- Security: https://github.com/melchior-voidwolf/ofterm/blob/main/docs/SECURITY.md
+
+## Facts
+
+- License: GPL-2.0 (free and open source).
+- Platforms: fnOS x86_64 and arm64 packages; browser UI for Safari 15+,
+  Chrome/Edge 100+, and Firefox 100+.
+- Backend: a single static Go binary; no runtime interpreter, no session daemon,
+  no external CDN.
+- Frontend: xterm.js with WebGL rendering and DOM fallback.
+- Inline images: OSC 1337 and Sixel; native Rust `imgcat`/`imgls` decode PNG,
+  JPEG, GIF, WebP, AVIF (x86_64/aarch64), BMP, TIFF, ICO, PNM, TGA, DDS, HDR,
+  QOI, and EXR in-process.
+- Privacy: no telemetry, no third-party analytics, no CDN dependencies; fnOS
+  owns access control; SSH hosts and credentials are never stored by the app.
+- Install: add https://raw.githubusercontent.com/melchior-voidwolf/ofterm/main/fnpack.json
+  as a custom app source in the fnOS App Center, or download the `.fpk` from
+  GitHub Releases.
+
+## FAQ
+
+- Is OFTerm free? Yes, it is GPL-2.0 open source.
+- Which architectures? fnOS x86_64 and arm64.
+- Does it collect data? No telemetry or analytics; access control belongs to fnOS.
+- How do I install it? Use the custom app source above or download the fpk from
+  GitHub Releases.
