@@ -203,7 +203,16 @@ export function SettingsDialog({ open, onOpenChange, settings, onChange, onInsta
                 <h3>OFTerm</h3>
                 <Row label="License">GPL-2.0</Row>
                 <Row label="Terminal">xterm.js</Row>
-                <Row label="Source">github.com/melchior-voidwolf/ofterm</Row>
+                <Row label="Source">
+                  <a href="https://github.com/melchior-voidwolf/ofterm" target="_blank" rel="noreferrer">
+                    github.com/melchior-voidwolf/ofterm
+                  </a>
+                </Row>
+                <Row label="Homepage">
+                  <a href="https://melchior-voidwolf.github.io/ofterm/" target="_blank" rel="noreferrer">
+                    melchior-voidwolf.github.io/ofterm
+                  </a>
+                </Row>
               </Tabs.Content>
             </div>
           </Tabs.Root>

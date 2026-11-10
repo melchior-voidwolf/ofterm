@@ -1,0 +1,18 @@
+# OFTerm — https://melchior-voidwolf.github.io/ofterm/
+User-agent: *
+Allow: /
+
+# Answer engines / AI crawlers are welcome.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://melchior-voidwolf.github.io/ofterm/sitemap.xml

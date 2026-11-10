@@ -6,6 +6,9 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 [English](README.md)
 
+[项目主页](https://melchior-voidwolf.github.io/ofterm/) · [GitHub 源码](https://github.com/melchior-voidwolf/ofterm) · [下载](https://github.com/melchior-voidwolf/ofterm/releases) · [问题反馈](https://github.com/melchior-voidwolf/ofterm/issues)
+
+[![Website](https://img.shields.io/badge/website-melchior--voidwolf.github.io%2Fofterm-blue)](https://melchior-voidwolf.github.io/ofterm/)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Version](https://img.shields.io/badge/version-1.1.4-blue)
@@ -214,6 +217,25 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 - fnOS 最新统一网关版本。`os_min_version` 只在真机验证后填写。
 - 浏览器：Safari 15+/iOS 15+、Chrome/Edge 100+、Firefox 100+。
 - 架构：x86_64、arm64；构建矩阵已为 `linux/loong64` 预留，待 fnOS 官方开放对应 platform 值。
+
+## 链接
+
+- **项目主页（GitHub Pages）：** https://melchior-voidwolf.github.io/ofterm/
+- **源码仓库：** https://github.com/melchior-voidwolf/ofterm
+- **下载与更新：** https://github.com/melchior-voidwolf/ofterm/releases
+- **问题反馈：** https://github.com/melchior-voidwolf/ofterm/issues
+- **辅助工具文档：** [docs/UTILITIES.md](docs/UTILITIES.md)
+- **隐私与安全：** [docs/PRIVACY.md](docs/PRIVACY.md)、[docs/SECURITY.md](docs/SECURITY.md)
+
+## 常见问题
+
+**OFTerm 是免费的吗？** 是。OFTerm 以 GPL-2.0 协议开源，源码托管在 GitHub。
+
+**支持哪些系统和架构？** 飞牛 fnOS x86_64 与 arm64 安装包；浏览器端支持 Safari 15+、Chrome/Edge 100+、Firefox 100+。
+
+**会收集数据吗？** 不会。无遥测、无第三方分析、无 CDN 依赖；访问控制由 fnOS 负责，SSH 凭据不保存在应用中。
+
+**如何安装？** 在 fnOS 应用中心添加自定义应用源（`fnpack.json`），或从 GitHub Releases 下载 `.fpk` 手动安装。
 
 ## 许可
 

@@ -6,6 +6,9 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
 
 [中文说明](README-cn.md)
 
+[Homepage](https://melchior-voidwolf.github.io/ofterm/) · [GitHub](https://github.com/melchior-voidwolf/ofterm) · [Releases](https://github.com/melchior-voidwolf/ofterm/releases) · [Issues](https://github.com/melchior-voidwolf/ofterm/issues)
+
+[![Website](https://img.shields.io/badge/website-melchior--voidwolf.github.io%2Fofterm-blue)](https://melchior-voidwolf.github.io/ofterm/)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
 ![Version](https://img.shields.io/badge/version-1.1.4-blue)
@@ -216,6 +219,25 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 - fnOS latest unified-gateway release. `os_min_version` is set only after device validation.
 - Browser targets: Safari 15+/iOS 15+, Chrome/Edge 100+, Firefox 100+.
 - Architectures: x86_64 and arm64; the build matrix is ready for `linux/loong64` once fnOS exposes the platform value.
+
+## Links
+
+- **Homepage (GitHub Pages):** https://melchior-voidwolf.github.io/ofterm/
+- **Source code:** https://github.com/melchior-voidwolf/ofterm
+- **Releases:** https://github.com/melchior-voidwolf/ofterm/releases
+- **Issue tracker:** https://github.com/melchior-voidwolf/ofterm/issues
+- **Utilities documentation:** [docs/UTILITIES.md](docs/UTILITIES.md)
+- **Privacy and security:** [docs/PRIVACY.md](docs/PRIVACY.md), [docs/SECURITY.md](docs/SECURITY.md)
+
+## FAQ
+
+**Is OFTerm free?** Yes. OFTerm is open source under GPL-2.0; the source is hosted on GitHub.
+
+**Which systems and architectures are supported?** fnOS with x86_64 and arm64 packages. The browser UI supports Safari 15+, Chrome/Edge 100+, and Firefox 100+.
+
+**Does OFTerm collect telemetry?** No. There is no telemetry, third-party analytics, or CDN dependency. fnOS owns access control, and SSH credentials are never stored by the app.
+
+**How do I install it?** Add the custom app source (`fnpack.json`) in the fnOS App Center, or download the `.fpk` from GitHub Releases.
 
 ## License
 

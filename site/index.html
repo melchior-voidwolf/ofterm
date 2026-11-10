@@ -3,10 +3,83 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>OFTerm - A Modern Terminal for fnOS</title>
+  <title>OFTerm — iTerm2 风格的 fnOS 开源终端（飞牛 NAS）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="OFTerm is an open-source terminal for fnOS. Split panes, smart tab titles, inline images, classic color presets, bilingual UI.">
+  <meta name="description" content="OFTerm 是面向飞牛 fnOS 的开源终端：iTerm2 风格标签与分屏、终端内图片（imgcat/imgls）、11 套经典配色、中英文界面。Go 单二进制后端，无遥测，支持 x86_64 / arm64。An open-source iTerm2-style terminal for fnOS.">
+  <meta name="keywords" content="OFTerm, fnOS, 飞牛, 飞牛NAS, NAS 终端, iTerm2, web terminal, 终端模拟器, imgcat, imgls, 开源终端, GPL-2.0">
+  <meta name="author" content="OFTerm Contributors">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="theme-color" content="#333333">
+  <meta name="application-name" content="OFTerm">
+  <link rel="canonical" href="https://melchior-voidwolf.github.io/ofterm/">
+  <link rel="alternate" hreflang="zh-CN" href="https://melchior-voidwolf.github.io/ofterm/">
+  <link rel="alternate" hreflang="en" href="https://melchior-voidwolf.github.io/ofterm/">
+  <link rel="alternate" hreflang="x-default" href="https://melchior-voidwolf.github.io/ofterm/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OFTerm">
+  <meta property="og:title" content="OFTerm — iTerm2 风格的 fnOS 开源终端">
+  <meta property="og:description" content="面向飞牛 fnOS 的开源终端：分屏、终端内图片（imgcat/imgls）、经典配色、中英文界面。Go 单二进制，无遥测。">
+  <meta property="og:url" content="https://melchior-voidwolf.github.io/ofterm/">
+  <meta property="og:image" content="https://melchior-voidwolf.github.io/ofterm/img/1.png">
+  <meta property="og:image:alt" content="OFTerm split terminal workspace">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OFTerm — iTerm2 风格的 fnOS 开源终端">
+  <meta name="twitter:description" content="面向飞牛 fnOS 的开源终端：分屏、内联图片（imgcat/imgls）、经典配色、中英文界面。">
+  <meta name="twitter:image" content="https://melchior-voidwolf.github.io/ofterm/img/1.png">
+  <meta name="twitter:image:alt" content="OFTerm split terminal workspace">
   <link rel="icon" type="image/png" href="img/icon_64.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://melchior-voidwolf.github.io/ofterm/#software",
+        "name": "OFTerm",
+        "alternateName": ["OFTerm 终端", "Open Fn Terminal"],
+        "description": "Open-source, iTerm2-style terminal for fnOS (飞牛 NAS). Split panes, inline images (imgcat/imgls), classic color presets, bilingual UI, and a single Go static binary.",
+        "url": "https://melchior-voidwolf.github.io/ofterm/",
+        "downloadUrl": "https://github.com/melchior-voidwolf/ofterm/releases",
+        "codeRepository": "https://github.com/melchior-voidwolf/ofterm",
+        "softwareVersion": "1.1.4",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "fnOS",
+        "license": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
+        "isAccessibleForFree": true,
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "author": {"@type": "Organization", "name": "OFTerm Contributors", "url": "https://github.com/melchior-voidwolf/ofterm"},
+        "publisher": {"@type": "Organization", "name": "OFTerm Contributors", "url": "https://github.com/melchior-voidwolf/ofterm"},
+        "screenshot": [
+          "https://melchior-voidwolf.github.io/ofterm/img/1.png",
+          "https://melchior-voidwolf.github.io/ofterm/img/2.png",
+          "https://melchior-voidwolf.github.io/ofterm/img/5.png"
+        ],
+        "sameAs": ["https://github.com/melchior-voidwolf/ofterm"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://melchior-voidwolf.github.io/ofterm/#website",
+        "url": "https://melchior-voidwolf.github.io/ofterm/",
+        "name": "OFTerm",
+        "description": "Open-source iTerm2-style terminal for fnOS.",
+        "inLanguage": ["zh-CN", "en"],
+        "publisher": {"@type": "Organization", "name": "OFTerm Contributors", "url": "https://github.com/melchior-voidwolf/ofterm"}
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://melchior-voidwolf.github.io/ofterm/#faq",
+        "mainEntity": [
+          {"@type": "Question", "name": "OFTerm 是免费的吗？", "acceptedAnswer": {"@type": "Answer", "text": "是。OFTerm 以 GPL-2.0 协议开源，源码托管在 GitHub，安装与使用不收费。"}},
+          {"@type": "Question", "name": "支持哪些系统和架构？", "acceptedAnswer": {"@type": "Answer", "text": "面向飞牛 fnOS，提供 x86_64 与 arm64 安装包；浏览器端支持 Safari 15+、Chrome/Edge 100+、Firefox 100+。"}},
+          {"@type": "Question", "name": "会收集数据吗？", "acceptedAnswer": {"@type": "Answer", "text": "不会。OFTerm 无遥测、无第三方分析、无 CDN 依赖；访问控制由 fnOS 负责，SSH 凭据不保存在应用中。"}},
+          {"@type": "Question", "name": "如何安装？", "acceptedAnswer": {"@type": "Answer", "text": "在 fnOS 应用中心添加自定义应用源，或从 GitHub Releases 下载 fpk 手动安装。"}}
+        ]
+      }
+    ]
+  }
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -118,7 +191,7 @@
     <div class="logo-header">
       <img src="img/icon_256.png" alt="OFTerm icon">
       <span class="wordmark">
-        <div class="name">OFTerm</div>
+        <h1 class="name">OFTerm</h1>
         <div class="tagline" data-i18n="tagline">为飞牛 fnOS 打造的现代终端</div>
       </span>
     </div>
@@ -201,6 +274,14 @@
         <p data-i18n="f-more-body">终端内显示图片（imgcat）、页内搜索、WebGL 渲染（自动降级）、断线短时重连、粘贴防护、中英文界面一键切换、随包附带 JetBrains Mono 兜底字体保证跨平台对齐。</p>
       </div>
 
+      <div class="feature-block" id="faq">
+        <h3 data-i18n="faq-title">常见问题</h3>
+        <p><strong data-i18n="faq-q1">OFTerm 是免费的吗？</strong><br><span data-i18n="faq-a1">是。OFTerm 以 GPL-2.0 协议开源，源码托管在 GitHub，安装与使用不收费。</span></p>
+        <p><strong data-i18n="faq-q2">支持哪些系统和架构？</strong><br><span data-i18n="faq-a2">面向飞牛 fnOS，提供 x86_64 与 arm64 安装包；浏览器端支持 Safari 15+、Chrome/Edge 100+、Firefox 100+。</span></p>
+        <p><strong data-i18n="faq-q3">会收集数据吗？</strong><br><span data-i18n="faq-a3">不会。OFTerm 无遥测、无第三方分析、无 CDN 依赖；访问控制由 fnOS 负责，SSH 凭据不保存在应用中。</span></p>
+        <p><strong data-i18n="faq-q4">如何安装？</strong><br><span data-i18n="faq-a4">在 fnOS 应用中心添加自定义应用源，或从 GitHub Releases 下载 fpk 手动安装；源码与文档都在 GitHub。</span></p>
+      </div>
+
       <div class="feature-block" id="download">
         <h3 data-i18n="dl-title">下载</h3>
         <p data-i18n="dl-body">当前版本 v1.1.4，支持 fnOS x86_64 与 arm64。</p>
@@ -208,6 +289,7 @@
           <a class="dl-button" href="https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.4/ofterm_1.1.4_x86.fpk">x86_64 · v1.1.4</a>
           <a class="dl-button" href="https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.4/ofterm_1.1.4_arm.fpk">arm64 · v1.1.4</a>
           <a class="dl-button secondary" href="https://github.com/melchior-voidwolf/ofterm/releases" data-i18n="dl-all">所有版本</a>
+          <a class="dl-button secondary" href="https://github.com/melchior-voidwolf/ofterm" data-i18n="dl-source">GitHub 源码</a>
         </div>
         <p class="muted" data-i18n="dl-note">推荐通过自定义应用源安装，升级更省心。校验值见 Release 页面的 SHA256SUMS。</p>
       </div>
@@ -254,9 +336,19 @@
       'f-theme-body': 'The interface supports light, dark, and follow-system modes. Terminal colors are independent of the UI theme, so you can mix and match.',
       'f-more': 'And More',
       'f-more-body': 'Inline images (imgcat), find-on-page, WebGL rendering with automatic fallback, short-window reconnection, paste protection, one-click Chinese/English UI, and a bundled JetBrains Mono fallback font for pixel-consistent alignment everywhere.',
+      'faq-title': 'Frequently Asked Questions',
+      'faq-q1': 'Is OFTerm free?',
+      'faq-a1': 'Yes. OFTerm is open source under GPL-2.0 and hosted on GitHub; installing and using it is free.',
+      'faq-q2': 'Which systems and architectures are supported?',
+      'faq-a2': 'OFTerm targets fnOS with x86_64 and arm64 packages. The browser UI supports Safari 15+, Chrome/Edge 100+, and Firefox 100+.',
+      'faq-q3': 'Does OFTerm collect data?',
+      'faq-a3': 'No. OFTerm has no telemetry, third-party analytics, or CDN dependencies. Access control is handled by fnOS, and SSH credentials are never stored by the app.',
+      'faq-q4': 'How do I install it?',
+      'faq-a4': 'Add a custom app source in the fnOS App Center, or download the fpk from GitHub Releases. Source code and docs are on GitHub.',
       'dl-title': 'Downloads',
       'dl-body': 'Current release: v1.1.4, for fnOS x86_64 and arm64.',
       'dl-all': 'All releases',
+      'dl-source': 'Source on GitHub',
       'dl-note': 'Installing via the custom app source is recommended for easier upgrades. Checksums are in SHA256SUMS on the release page.',
       'footer-free': 'Free and open source software, GPL-2.0',
       'footer-issues': 'Issue tracker',
