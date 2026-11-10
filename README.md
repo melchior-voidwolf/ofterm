@@ -9,9 +9,13 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
 [Homepage](https://melchior-voidwolf.github.io/ofterm/) · [GitHub](https://github.com/melchior-voidwolf/ofterm) · [Releases](https://github.com/melchior-voidwolf/ofterm/releases) · [Issues](https://github.com/melchior-voidwolf/ofterm/issues)
 
 [![Website](https://img.shields.io/badge/website-melchior--voidwolf.github.io%2Fofterm-blue)](https://melchior-voidwolf.github.io/ofterm/)
+[![CI](https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml)
+[![Release](https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml/badge.svg)](https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/melchior-voidwolf/ofterm?sort=semver&label=release)](https://github.com/melchior-voidwolf/ofterm/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/melchior-voidwolf/ofterm/total?label=downloads)](https://github.com/melchior-voidwolf/ofterm/releases)
+[![Stars](https://img.shields.io/github/stars/melchior-voidwolf/ofterm?label=stars)](https://github.com/melchior-voidwolf/ofterm/stargazers)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
-![Version](https://img.shields.io/badge/version-1.1.4-blue)
 
 <table>
   <tr>

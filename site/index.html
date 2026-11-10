@@ -93,12 +93,14 @@
 
     /* Logo header */
     .logo-header { text-align: center; padding: 40px 0 28px; }
-    .logo-header img { width: 96px; height: 96px; border-radius: 22px; vertical-align: middle; }
+    .logo-header > img { width: 96px; height: 96px; border-radius: 22px; vertical-align: middle; }
     .logo-header .wordmark {
       display: inline-block; vertical-align: middle; margin-left: 18px; text-align: left;
     }
     .logo-header .wordmark .name { font-size: 44px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
     .logo-header .wordmark .tagline { font-size: 16px; color: #6f6f6f; margin-top: 4px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+    .badges img { width: auto; height: 20px; vertical-align: middle; }
 
     /* Top bar */
     .top-bar { background: #333333; }
@@ -194,6 +196,13 @@
         <h1 class="name">OFTerm</h1>
         <div class="tagline" data-i18n="tagline">为飞牛 fnOS 打造的现代终端</div>
       </span>
+      <div class="badges">
+        <a href="https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml"><img src="https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"></a>
+        <a href="https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml"><img src="https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml/badge.svg" alt="Release build"></a>
+        <a href="https://github.com/melchior-voidwolf/ofterm/releases/latest"><img src="https://img.shields.io/github/v/release/melchior-voidwolf/ofterm?sort=semver&amp;label=release" alt="Latest release"></a>
+        <a href="https://github.com/melchior-voidwolf/ofterm/releases"><img src="https://img.shields.io/github/downloads/melchior-voidwolf/ofterm/total?label=downloads" alt="Downloads"></a>
+        <img src="https://img.shields.io/badge/license-GPL--2.0-blue" alt="GPL-2.0">
+      </div>
     </div>
     <nav class="top-bar">
       <div class="wrap">

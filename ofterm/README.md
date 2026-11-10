@@ -7,6 +7,11 @@ OFTerm 是面向飞牛 fnOS 的开源终端应用。界面与偏好设置参考 
 
 [项目主页](https://melchior-voidwolf.github.io/ofterm/) · [GitHub 源码](https://github.com/melchior-voidwolf/ofterm) · [下载](https://github.com/melchior-voidwolf/ofterm/releases) · [问题反馈](https://github.com/melchior-voidwolf/ofterm/issues)
 
+[![CI](https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/melchior-voidwolf/ofterm/actions/workflows/ci.yml)
+[![Release](https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml/badge.svg)](https://github.com/melchior-voidwolf/ofterm/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/melchior-voidwolf/ofterm?sort=semver&label=release)](https://github.com/melchior-voidwolf/ofterm/releases/latest)
+![License](https://img.shields.io/badge/license-GPL--2.0-blue)
+
 ## 主要功能
 
 - 打开即终端，iTerm2 式标签窗口，不区分“本地/远程”首页
