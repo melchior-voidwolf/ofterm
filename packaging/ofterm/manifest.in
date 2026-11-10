@@ -1,6 +1,6 @@
 version=@VERSION@
 appname=ofterm
-desc=面向飞牛 fnOS 的开源终端应用，iTerm2 风格界面与设置，提供本地 Shell。
+desc=面向飞牛 fnOS 的开源 iTerm2 风格终端：分屏、标签页、终端内图片（imgcat/imgls）、经典配色，支持 x86_64/arm64。
 display_name=OFTerm 终端
 source=thirdparty
 platform=@PLATFORM@

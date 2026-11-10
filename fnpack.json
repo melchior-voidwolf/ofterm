@@ -4,12 +4,12 @@
     "name": "OFTerm 应用源",
     "author": "OFTerm Contributors",
     "homepage": "https://github.com/melchior-voidwolf/ofterm",
-    "description": "OFTerm 官方应用源:面向飞牛 fnOS 的开源 iTerm2 风格终端。"
+    "description": "OFTerm 官方应用源:面向飞牛 fnOS 的开源 iTerm2 风格终端,支持分屏、终端内图片与经典终端配色。"
   },
   "apps": {
     "ofterm": {
       "display_name": "OFTerm 终端",
-      "desc": "面向飞牛 fnOS 的开源终端应用,iTerm2 风格界面与设置,提供本地 Shell。",
+      "desc": "面向飞牛 fnOS 的开源 iTerm2 风格终端:分屏、标签页、终端内图片(imgcat/imgls)、经典配色,支持 x86_64/arm64。",
       "platform": [
         "x86",
         "arm"
