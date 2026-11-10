@@ -76,9 +76,11 @@ export class SessionClient {
   private settings: Settings
   private mode: 'light' | 'dark'
   private callbacks: SessionCallbacks
-  private multipart: { params: string; data: string; anchored: boolean } | null = null
-  private imageAnchors: boolean[] = []
+  private multipart: { params: string; data: string } | null = null
   private pendingOutput = new Uint8Array(0)
+  private outputQueue: Array<{ data: Uint8Array; image: boolean }> = []
+  private pumpingOutput = false
+  private imageEndWaiter: ((result: boolean | Promise<boolean>) => void) | null = null
 
   constructor(settings: Settings, mode: 'light' | 'dark', callbacks: SessionCallbacks = {}) {
     this.settings = settings
@@ -112,7 +114,7 @@ export class SessionClient {
     this.terminal.loadAddon(this.fit)
     this.terminal.loadAddon(this.image)
     this.registerOscHandlers()
-    this.patchImagePlacement()
+    this.installImageBarrier()
     this.terminal.loadAddon(this.search)
     this.terminal.loadAddon(new WebLinksAddon())
     this.terminal.loadAddon(this.unicode)
@@ -170,7 +172,10 @@ export class SessionClient {
     }
     this.pendingOutput = new Uint8Array(0)
 
-    const out: Uint8Array[] = []
+    const out: Array<{ data: Uint8Array; image: boolean }> = []
+    const text = (data: Uint8Array) => {
+      if (data.length) out.push({ data, image: false })
+    }
     let start = 0
     let i = 0
     let pendingFrom = -1
@@ -181,7 +186,7 @@ export class SessionClient {
       }
       if (i + 7 > chunk.length) {
         // Split ESC ]1337; prefix: emit bytes before it and keep the rest.
-        out.push(chunk.subarray(start, i))
+        text(chunk.subarray(start, i))
         pendingFrom = i
         break
       }
@@ -190,7 +195,7 @@ export class SessionClient {
         chunk[i + 2] === 0x31 && chunk[i + 3] === 0x33 &&
         chunk[i + 4] === 0x33 && chunk[i + 5] === 0x37 && chunk[i + 6] === 0x3b
       if (!is1337) {
-        out.push(chunk.subarray(start, i + 1))
+        text(chunk.subarray(start, i + 1))
         start = i + 1
         i++
         continue
@@ -211,27 +216,35 @@ export class SessionClient {
       }
       if (end < 0) {
         // Incomplete OSC: do not emit the partial sequence twice.
-        out.push(chunk.subarray(start, i))
+        text(chunk.subarray(start, i))
         pendingFrom = i
         break
       }
       const payload = decoder.decode(chunk.subarray(i + 7, end))
       const nextStart = end + termLen
+      // Emit the bytes between the previous output and this OSC. imgls writes
+      // DECSC immediately before every thumbnail, and dropping that byte made
+      // the following DECRC restore a stale cursor position: every grid row
+      // then stacked on the first one.
+      text(chunk.subarray(start, i))
       if (payload.startsWith('MultipartFile=')) {
         this.multipart = {
           params: payload.slice('MultipartFile='.length),
           data: '',
-          anchored: /(^|;)ofn_anchor=1(;|$)/.test(payload),
         }
       } else if (this.multipart && payload.startsWith('FilePart=')) {
         this.multipart.data += payload.slice('FilePart='.length)
       } else if (this.multipart && payload === 'FileEnd') {
-        out.push(encoder.encode(`\x1b]1337;File=${this.multipart.params}:${this.multipart.data}\x07`))
-        this.imageAnchors.push(this.multipart.anchored)
+        out.push({
+          data: encoder.encode(`\x1b]1337;File=${this.multipart.params}:${this.multipart.data}\x07`),
+          image: true,
+        })
         this.multipart = null
       } else {
-        out.push(chunk.subarray(i, nextStart))
-        this.imageAnchors.push(/(^|;)ofn_anchor=1(;|$)/.test(payload))
+        out.push({
+          data: chunk.subarray(i, nextStart),
+          image: payload.startsWith('File=') && !/(^|;)inline=0(;|$)/.test(payload),
+        })
       }
       i = nextStart
       start = nextStart
@@ -239,71 +252,71 @@ export class SessionClient {
     if (pendingFrom >= 0) {
       this.pendingOutput = chunk.slice(pendingFrom)
     } else if (start < chunk.length) {
-      out.push(chunk.subarray(start))
+      text(chunk.subarray(start))
     }
-    for (const part of out) this.terminal.write(part)
+    this.queueOutput(out)
   }
 
-  // @xterm/addon-image draws an image at the cursor position current when the
-  // browser finishes decoding it, not when the escape sequence was parsed.
-  // imgls emits several thumbnails per row, so later cells land below their
-  // grid row once the parser has moved on. Images carrying the ofn_anchor
-  // marker are pinned to the cursor position captured synchronously at the end
-  // of their escape sequence instead.
-  private patchImagePlacement() {
-    type Origin = { x: number; y: number }
-    const internals = this.image as unknown as {
-      _storage?: { addImage: (img: HTMLCanvasElement | ImageBitmap) => void }
+  // The image addon places a picture at the cursor position current when the
+  // browser finishes decoding it, while a native terminal like iTerm2 does it
+  // synchronously. imgls emits whole grids, so later cells (and the label
+  // rows) would be parsed and drawn before earlier images have decoded.
+  // Holding the output stream until each inline image has been handed to the
+  // addon gives it the same parse-time cursor position iTerm2 uses.
+  private installImageBarrier() {
+    const handler = (this.image as unknown as {
       _handlers?: Map<string, { end: (success: boolean) => boolean | Promise<boolean> }>
-    }
-    const storage = internals._storage
-    const handler = internals._handlers?.get('iip')
-    const core = (this.terminal as unknown as { _core?: { buffer?: Origin } })._core
-    if (!storage || !handler || !core?.buffer) return
-    const buffer = core.buffer
-
-    let captured: Origin | null = null
+    })._handlers?.get('iip')
+    if (!handler) return
     const originalEnd = handler.end.bind(handler)
     handler.end = (success: boolean) => {
-      captured = this.imageAnchors.shift() === true ? { x: buffer.x, y: buffer.y } : null
-      try {
-        return originalEnd(success)
-      } finally {
-        captured = null
-      }
+      const result = originalEnd(success)
+      const waiter = this.imageEndWaiter
+      this.imageEndWaiter = null
+      waiter?.(result)
+      return result
     }
+  }
 
-    const createBitmap = window.createImageBitmap?.bind(window)
-    if (createBitmap) {
-      window.createImageBitmap = ((...args: Parameters<typeof createImageBitmap>) => {
-        const origin = captured
-        return createBitmap(...args).then((bitmap) => {
-          if (origin) {
-            ;(bitmap as ImageBitmap & { oftermOrigin?: Origin }).oftermOrigin = origin
-          }
-          return bitmap
+  private queueOutput(parts: Array<{ data: Uint8Array; image: boolean }>) {
+    if (!parts.length) return
+    this.outputQueue.push(...parts)
+    void this.pumpOutput()
+  }
+
+  private async pumpOutput() {
+    if (this.pumpingOutput) return
+    this.pumpingOutput = true
+    try {
+      while (this.outputQueue.length) {
+        const part = this.outputQueue.shift()!
+        if (!part.image) {
+          await this.writeTerminal(part.data)
+          continue
+        }
+        const imageEnd = new Promise<boolean | Promise<boolean>>((resolve) => {
+          this.imageEndWaiter = resolve
         })
-      }) as typeof window.createImageBitmap
+        await this.writeTerminal(part.data)
+        const result = await this.waitForImage(imageEnd, false)
+        if (typeof result !== 'boolean') {
+          await this.waitForImage(result, false)
+        }
+      }
+    } finally {
+      this.pumpingOutput = false
     }
+  }
 
-    const originalAdd = storage.addImage.bind(storage)
-    storage.addImage = (img: HTMLCanvasElement | ImageBitmap) => {
-      const origin = (img as ImageBitmap & { oftermOrigin?: Origin }).oftermOrigin
-      if (!origin) {
-        originalAdd(img)
-        return
-      }
-      const savedX = buffer.x
-      const savedY = buffer.y
-      buffer.x = origin.x
-      buffer.y = origin.y
-      try {
-        originalAdd(img)
-      } finally {
-        buffer.x = savedX
-        buffer.y = savedY
-      }
-    }
+  private writeTerminal(data: Uint8Array): Promise<void> {
+    return new Promise((resolve) => this.terminal.write(data, resolve))
+  }
+
+  private waitForImage<T>(promise: Promise<T>, fallback: T): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((resolve) => window.setTimeout(() => resolve(fallback), 3000)),
+    ])
   }
 
   private registerOscHandlers() {

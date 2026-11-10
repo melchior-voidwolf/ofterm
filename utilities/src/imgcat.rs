@@ -82,9 +82,6 @@ fn params<'a>(opts: &'a Options, name: Option<&'a str>, size: u64) -> Params<'a>
         type_hint: opts.type_hint.as_deref(),
         legacy: opts.legacy,
         size,
-        // The shell imgls fallback delegates each cell to imgcat; it sets this
-        // marker so OFTerm pins the thumbnail to the cell it was emitted for.
-        anchor: std::env::var_os("OFN_IMG_ANCHOR").is_some_and(|v| v == "1"),
     }
 }
 

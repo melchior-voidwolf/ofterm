@@ -168,7 +168,6 @@ fn render_row<W: Write>(
             type_hint: None,
             legacy: false,
             size: payload.len() as u64,
-            anchor: true,
         };
         // Image addons may line-feed while drawing. DECSC/DECRC makes the
         // grid independent of the image's actual height and cursor mode.
