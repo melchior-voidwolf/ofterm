@@ -36,6 +36,24 @@
       "is_docker": false,
       "service_port": "",
       "releases": {
+        "1.1.1": {
+          "changelog": "参见 Release notes:https://github.com/melchior-voidwolf/ofterm/releases/tag/v1.1.1",
+          "updated_at": "2026-11-10T12:47:36.047Z",
+          "os_min_version": "",
+          "os_max_version": "",
+          "packages": {
+            "x86": {
+              "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.1/ofterm_1.1.1_x86.fpk",
+              "sha256": "da1645dcb0394422f91eea562ed93a7b69a6c84e1bc202c3b8c626c32b7131aa",
+              "size": 3695324
+            },
+            "arm": {
+              "download_url": "https://github.com/melchior-voidwolf/ofterm/releases/download/v1.1.1/ofterm_1.1.1_arm.fpk",
+              "sha256": "a5caf1feb00db4b6ec234e524174ac72121d30b6924577e51c6fe18bf771ab13",
+              "size": 3385484
+            }
+          }
+        },
         "1.1.0": {
           "changelog": "参见 Release notes:https://github.com/melchior-voidwolf/ofterm/releases/tag/v1.1.0",
           "updated_at": "2026-11-04T19:03:43.678Z",
