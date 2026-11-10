@@ -50,6 +50,13 @@ for (const target of targets) {
     // Static musl linking works from either macOS or Linux via clang + lld.
     env[`CARGO_TARGET_${target.rust.toUpperCase().replaceAll('-', '_')}_LINKER`] = clang
     env.RUSTFLAGS = `-C link-arg=--target=${target.rust} -C link-arg=-fuse-ld=lld`
+    // rav1d assembles its SIMD kernels into a static archive through cc-rs.
+    // macOS's host `ar` writes a BSD archive that ld.lld cannot read, so use
+    // LLVM's archiver for cross builds (Linux CI already has GNU ar).
+    if (process.platform === 'darwin') {
+      env.AR = join(dirname(clang), 'llvm-ar')
+      env.RANLIB = join(dirname(clang), 'llvm-ranlib')
+    }
   }
   console.log(`cargo build --target ${target.rust}`)
   execFileSync('cargo', ['build', '--release', '--target', target.rust], {

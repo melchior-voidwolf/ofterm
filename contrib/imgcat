@@ -157,6 +157,9 @@ function print_image() {
     fi
     printf "=inline=%s" "$2"
     printf ";size=%d" $(printf "%s" "$3" | b64_decode | wc -c)
+    # imgls pins each cell to the cursor position where the sequence was
+    # parsed; OFTerm understands this private marker and ignores it elsewhere.
+    [ "${OFN_IMG_ANCHOR:-0}" = "1" ] && printf ";ofn_anchor=1"
     [ -n "$1" ] && printf ";name=%s" "$(printf "%s" "$1" | b64_encode)"
     [ -n "$5" ] && printf ";width=%s" "$5"
     [ -n "$6" ] && printf ";height=%s" "$6"

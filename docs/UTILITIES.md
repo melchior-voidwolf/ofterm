@@ -38,7 +38,7 @@ PREFIX=/usr/local/bin FORCE=1 \
 `imgcat` / `imgls` 优先使用原生二进制 `ofterm-utils`（Rust，静态链接），由安装命令从 GitHub Releases 按架构下载：
 
 - 一个多调用二进制，按 `argv[0]` 分发；安装时创建 `imgcat` / `imgls` 符号链接。
-- 自带 PNG/JPEG/GIF/WebP/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。
+- 自带 PNG/JPEG/GIF/WebP/AVIF/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。AVIF 由纯 Rust 的 `avif-decode`（rav1d）解码，不需要 libavif/dav1d 动态库。
 - 支持平台：Linux x86_64 / aarch64 / armv7，macOS x86_64 / arm64（静态 musl 构建，不挑发行版）。
 - 安装脚本用 `uname -s` / `uname -m` 精确选型，下载后先跑 `--selftest`；**下载失败、不匹配或无法执行时自动回退到同目录下的 shell 脚本**，功能不受影响，只是大图缩图依赖 `sips`/ImageMagick。
 - 二进制不嵌入安装包（注入终端太慢），随 GitHub Release 独立分发，应用内安装与 `contrib/install-utils.sh` 使用同一下载地址。
@@ -47,7 +47,7 @@ PREFIX=/usr/local/bin FORCE=1 \
 
 - `imgcat` 默认按当前终端尺寸缩图，避免把 4000×3000 原图整包 base64 传给浏览器。可用 `--no-shrink` 或 `OFN_IMG_MAX_PX=0` 关闭。
 - 原生实现会读取终端真实像素尺寸（`TIOCGWINSZ` 的 `ws_xpixel`）；拿不到时按 80×24 单元格估算。
-- EXIF 方向会被应用（手机照片不会躺倒）；动画 GIF/WebP **不缩图、原样透传**，保证动画不丢。
+- EXIF 方向会被应用（手机照片不会躺倒）；动画 GIF/WebP/AVIF **不缩图、原样透传**，保证动画不丢。
 - 传输前若仍超过约 6.8 MB，会进一步缩小或在无法缩小时报错，避免撞上前端 xterm 单条 OSC 10 MB 上限后“静默不显示”。
 - `imgls` 默认按 20×10 单元格生成缩略图，列数随终端宽度自适应（80 列 3 列、100 列 4 列、110 列 5 列），文件名与像素尺寸显示在图片下方（`--no-dimensions` 关闭尺寸行，`--columns N` 限制列数）。已渲染的网格不会随窗口拖动重排——宽高按单元格下发会跟随缩放，重跑一次 `imgls` 即按新宽度重排。
 - 实测（180 个文件 / 195 MB 漫画目录）：原生实现 12.1 s / 29 MB 峰值内存，shell 版 27.9 s / 157 MB。

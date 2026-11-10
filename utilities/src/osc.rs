@@ -57,6 +57,11 @@ pub struct Params<'a> {
     pub type_hint: Option<&'a str>,
     pub legacy: bool,
     pub size: u64,
+    /// Ask OFTerm to place the image at the cursor position captured when the
+    /// sequence was parsed, not when the browser finishes decoding it. imgls
+    /// sets this for grid cells; plain imgcat leaves it off so the image
+    /// advances the cursor the way the image addon expects.
+    pub anchor: bool,
 }
 
 impl Params<'_> {
@@ -68,6 +73,9 @@ impl Params<'_> {
             b"MultipartFile=inline=1"
         });
         h.extend_from_slice(format!(";size={}", self.size).as_bytes());
+        if self.anchor {
+            h.extend_from_slice(b";ofn_anchor=1");
+        }
         if let Some(name) = self.name {
             h.extend_from_slice(b";name=");
             h.extend_from_slice(&crate::base64::encode(name.as_bytes()));

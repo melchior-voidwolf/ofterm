@@ -160,7 +160,7 @@ flush_row() {
     local opts=(-W "$width" -H "$height")
     [ "$preserve" = 1 ] && opts+=(-r)
     # The DECRC below also undoes imgcat's trailing newline.
-    OFN_IMG_MAX_PX="$max_px" "${here}/imgcat" "${opts[@]}" "${row_paths[$i]}" || true
+    OFN_IMG_MAX_PX="$max_px" OFN_IMG_ANCHOR=1 "${here}/imgcat" "${opts[@]}" "${row_paths[$i]}" || true
     printf '\0338'
   done
 

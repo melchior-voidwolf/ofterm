@@ -76,7 +76,8 @@ export class SessionClient {
   private settings: Settings
   private mode: 'light' | 'dark'
   private callbacks: SessionCallbacks
-  private multipart: { params: string; data: string } | null = null
+  private multipart: { params: string; data: string; anchored: boolean } | null = null
+  private imageAnchors: boolean[] = []
   private pendingOutput = new Uint8Array(0)
 
   constructor(settings: Settings, mode: 'light' | 'dark', callbacks: SessionCallbacks = {}) {
@@ -111,6 +112,7 @@ export class SessionClient {
     this.terminal.loadAddon(this.fit)
     this.terminal.loadAddon(this.image)
     this.registerOscHandlers()
+    this.patchImagePlacement()
     this.terminal.loadAddon(this.search)
     this.terminal.loadAddon(new WebLinksAddon())
     this.terminal.loadAddon(this.unicode)
@@ -216,14 +218,20 @@ export class SessionClient {
       const payload = decoder.decode(chunk.subarray(i + 7, end))
       const nextStart = end + termLen
       if (payload.startsWith('MultipartFile=')) {
-        this.multipart = { params: payload.slice('MultipartFile='.length), data: '' }
+        this.multipart = {
+          params: payload.slice('MultipartFile='.length),
+          data: '',
+          anchored: /(^|;)ofn_anchor=1(;|$)/.test(payload),
+        }
       } else if (this.multipart && payload.startsWith('FilePart=')) {
         this.multipart.data += payload.slice('FilePart='.length)
       } else if (this.multipart && payload === 'FileEnd') {
         out.push(encoder.encode(`\x1b]1337;File=${this.multipart.params}:${this.multipart.data}\x07`))
+        this.imageAnchors.push(this.multipart.anchored)
         this.multipart = null
       } else {
         out.push(chunk.subarray(i, nextStart))
+        this.imageAnchors.push(/(^|;)ofn_anchor=1(;|$)/.test(payload))
       }
       i = nextStart
       start = nextStart
@@ -234,6 +242,68 @@ export class SessionClient {
       out.push(chunk.subarray(start))
     }
     for (const part of out) this.terminal.write(part)
+  }
+
+  // @xterm/addon-image draws an image at the cursor position current when the
+  // browser finishes decoding it, not when the escape sequence was parsed.
+  // imgls emits several thumbnails per row, so later cells land below their
+  // grid row once the parser has moved on. Images carrying the ofn_anchor
+  // marker are pinned to the cursor position captured synchronously at the end
+  // of their escape sequence instead.
+  private patchImagePlacement() {
+    type Origin = { x: number; y: number }
+    const internals = this.image as unknown as {
+      _storage?: { addImage: (img: HTMLCanvasElement | ImageBitmap) => void }
+      _handlers?: Map<string, { end: (success: boolean) => boolean | Promise<boolean> }>
+    }
+    const storage = internals._storage
+    const handler = internals._handlers?.get('iip')
+    const core = (this.terminal as unknown as { _core?: { buffer?: Origin } })._core
+    if (!storage || !handler || !core?.buffer) return
+    const buffer = core.buffer
+
+    let captured: Origin | null = null
+    const originalEnd = handler.end.bind(handler)
+    handler.end = (success: boolean) => {
+      captured = this.imageAnchors.shift() === true ? { x: buffer.x, y: buffer.y } : null
+      try {
+        return originalEnd(success)
+      } finally {
+        captured = null
+      }
+    }
+
+    const createBitmap = window.createImageBitmap?.bind(window)
+    if (createBitmap) {
+      window.createImageBitmap = ((...args: Parameters<typeof createImageBitmap>) => {
+        const origin = captured
+        return createBitmap(...args).then((bitmap) => {
+          if (origin) {
+            ;(bitmap as ImageBitmap & { oftermOrigin?: Origin }).oftermOrigin = origin
+          }
+          return bitmap
+        })
+      }) as typeof window.createImageBitmap
+    }
+
+    const originalAdd = storage.addImage.bind(storage)
+    storage.addImage = (img: HTMLCanvasElement | ImageBitmap) => {
+      const origin = (img as ImageBitmap & { oftermOrigin?: Origin }).oftermOrigin
+      if (!origin) {
+        originalAdd(img)
+        return
+      }
+      const savedX = buffer.x
+      const savedY = buffer.y
+      buffer.x = origin.x
+      buffer.y = origin.y
+      try {
+        originalAdd(img)
+      } finally {
+        buffer.x = savedX
+        buffer.y = savedY
+      }
+    }
   }
 
   private registerOscHandlers() {
