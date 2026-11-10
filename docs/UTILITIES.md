@@ -38,7 +38,7 @@ PREFIX=/usr/local/bin FORCE=1 \
 `imgcat` / `imgls` 优先使用原生二进制 `ofterm-utils`（Rust，静态链接），由安装命令从 GitHub Releases 按架构下载：
 
 - 一个多调用二进制，按 `argv[0]` 分发；安装时创建 `imgcat` / `imgls` 符号链接。
-- 自带 PNG/JPEG/GIF/WebP/AVIF/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。AVIF 由纯 Rust 的 `avif-decode`（rav1d）解码，不需要 libavif/dav1d 动态库。
+- 自带 PNG/JPEG/GIF/WebP/AVIF/BMP/TIFF/ICO/PNM/TGA/DDS/HDR/QOI/EXR 解码，不依赖 `sips` 或 ImageMagick。AVIF 由纯 Rust 的 `avif-decode`（rav1d）解码，不需要 libavif/dav1d 动态库；它仅在 x86_64/aarch64 构建中启用（rav1d 在 32 位 armv7 上需要 nightly，因此 armv7 构建不含 AVIF）。
 - 支持平台：Linux x86_64 / aarch64 / armv7，macOS x86_64 / arm64（静态 musl 构建，不挑发行版）。
 - 安装脚本用 `uname -s` / `uname -m` 精确选型，下载后先跑 `--selftest`；**下载失败、不匹配或无法执行时自动回退到同目录下的 shell 脚本**，功能不受影响，只是大图缩图依赖 `sips`/ImageMagick。
 - 二进制不嵌入安装包（注入终端太慢），随 GitHub Release 独立分发，应用内安装与 `contrib/install-utils.sh` 使用同一下载地址。

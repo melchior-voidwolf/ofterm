@@ -8,7 +8,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
-![Version](https://img.shields.io/badge/version-1.1.3-blue)
+![Version](https://img.shields.io/badge/version-1.1.4-blue)
 
 <table>
   <tr>
@@ -21,7 +21,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
   </tr>
 </table>
 
-> **状态：1.1.3。** x86_64 与 arm64 安装包均已可构建。飞牛官方商店提交审核进行中，审核通过前请从 GitHub Releases 安装 `.fpk`。
+> **状态：1.1.4。** x86_64 与 arm64 安装包均已可构建。飞牛官方商店提交审核进行中，审核通过前请从 GitHub Releases 安装 `.fpk`。
 
 ## 设计原则
 
@@ -74,7 +74,7 @@ OFTerm 是独立开发的 fnOS 终端工作区。它在 fnOS 桌面窗口内提�
 
 `imgcat` / `imgls` 由自研的 Rust 二进制（`utilities/`，GPL-2.0）提供，不是包装外部工具的脚本；随应用分发，目标机器上不需要安装任何东西。
 
-- **零依赖**：PNG、JPEG、GIF、WebP、AVIF、BMP、TIFF、ICO、PNM、TGA、DDS、HDR、QOI、EXR 全部在进程内解码。
+- **零依赖**：PNG、JPEG、GIF、WebP、AVIF（x86_64/aarch64）、BMP、TIFF、ICO、PNM、TGA、DDS、HDR、QOI、EXR 全部在进程内解码。
 - **先缩图再传输**：按终端像素尺寸缩图，十几 MB 的照片实际只传几十 KB。
 - **细节正确**：应用 EXIF 方向（手机照片不会躺倒）；动画 GIF/WebP 原样透传；缩图结果只有在确实更小时才采用。
 - **不会静默失败**：接近终端 1000 万字符的 OSC 上限时会逐级缩小，实在放不下则明确报错，而不是让图片悄悄消失。
@@ -147,9 +147,9 @@ docs/                        架构、安全、隐私、兼容性文档
 
 ## 下载
 
-- **稳定版（x86_64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.3_x86.fpk
-- **稳定版（arm64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.3_arm.fpk
-- **release 分支滚动构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.3_x86.fpk（或 `ofterm_1.1.3_arm.fpk`）。
+- **稳定版（x86_64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_x86.fpk
+- **稳定版（arm64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_arm.fpk
+- **release 分支滚动构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.4_x86.fpk（或 `ofterm_1.1.4_arm.fpk`）。
 
 `fnpack.json` 指向稳定版；预发布构建使用显式的 `release` tag。
 
@@ -183,7 +183,7 @@ chmod +x /tmp/fnpack
 FNPACK=/tmp/fnpack VERSION=0.1.0 node scripts/build-fpk.mjs --all
 ```
 
-产物位于 `build/out/ofterm_1.1.3_x86.fpk` 与 `build/out/ofterm_1.1.3_arm.fpk`。
+产物位于 `build/out/ofterm_1.1.4_x86.fpk` 与 `build/out/ofterm_1.1.4_arm.fpk`。
 
 本地开发：
 
@@ -197,7 +197,7 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 - `.github/workflows/ci.yml`：在 `main`/`master`/PR 上运行前端测试与构建、后端 vet/测试和 Linux 交叉编译，不发布安装包。
 - `.github/workflows/release.yml`：在 `release` 分支和 `v*` tag 上构建。推送到 `release` 发布会滚动预发布（tag 为 `release`）；`v*` tag 发布稳定版。
-- 两个渠道都会附加 `ofterm_1.1.3_x86.fpk`、`ofterm_1.1.3_arm.fpk` 和 `SHA256SUMS`。
+- 两个渠道都会附加 `ofterm_1.1.4_x86.fpk`、`ofterm_1.1.4_arm.fpk` 和 `SHA256SUMS`。
 - `build/architectures.json` 是唯一的架构来源。新增 Go 支持的架构不需要修改后端。
 
 ## 安全与隐私

@@ -22,7 +22,7 @@ license texts live in `licenses/`; the CI license gate is not implemented yet.
 | JetBrains Mono | @fontsource/jetbrains-mono | OFL-1.1 | Bundled monospace fallback |
 | iTerm2 imgcat | derived | GPL-2.0 | Inline image helper (contrib/imgcat), modified to downscale before transfer |
 | image (Rust) | pinned in utilities/Cargo.lock | MIT OR Apache-2.0 | Decoding and downscaling in the native utilities binary |
-| avif-decode (Rust) | pinned in utilities/Cargo.lock | BSD-3-Clause | AVIF decoding in the native utilities binary |
+| avif-decode (Rust) | pinned in utilities/Cargo.lock | BSD-3-Clause | AVIF decoding in the native utilities binary (x86_64/aarch64) |
 | avif-parse (Rust) | pinned in utilities/Cargo.lock | MPL-2.0 | AVIF container parsing for dimensions |
 | rav1d (Rust) | pinned in utilities/Cargo.lock | BSD-2-Clause | Pure-Rust AV1 decoder used by avif-decode (transitive) |
 | kamadak-exif (Rust) | pinned in utilities/Cargo.lock | BSD-2-Clause | EXIF orientation for phone photos |

@@ -11,10 +11,7 @@ use std::path::Path;
 
 use image::codecs::jpeg::JpegEncoder;
 use image::imageops::FilterType;
-use image::{
-    DynamicImage, GrayImage, ImageBuffer, ImageEncoder, ImageFormat, ImageReader, Luma, Rgb,
-    RgbImage, RgbaImage,
-};
+use image::{DynamicImage, ImageEncoder, ImageFormat, ImageReader};
 
 /// A decoded image plus the format it should be re-encoded to.
 pub struct Prepared {
@@ -22,110 +19,140 @@ pub struct Prepared {
     pub format: ImageFormat,
 }
 
-/// The `ftyp` box of an ISO base media file (AVIF/HEIF), if present.
-fn ftyp(data: &[u8]) -> Option<&[u8]> {
-    if data.len() < 12 || &data[4..8] != b"ftyp" {
-        return None;
+// rav1d needs the unstable `stdarch_arm_feature_detection` feature on 32-bit
+// ARM, so the static armv7 build cannot use it on stable Rust. Keep AVIF
+// support on the 64-bit targets and fall back to the other decoders on armv7.
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+mod avif {
+    use super::*;
+    use image::{GrayImage, ImageBuffer, Luma, Rgb, RgbImage, RgbaImage};
+
+    /// The `ftyp` box of an ISO base media file (AVIF/HEIF), if present.
+    fn ftyp(data: &[u8]) -> Option<&[u8]> {
+        if data.len() < 12 || &data[4..8] != b"ftyp" {
+            return None;
+        }
+        let size = u32::from_be_bytes(data[0..4].try_into().ok()?) as usize;
+        if size < 12 {
+            return None;
+        }
+        Some(&data[..size.min(data.len())])
     }
-    let size = u32::from_be_bytes(data[0..4].try_into().ok()?) as usize;
-    if size < 12 {
-        return None;
+
+    fn has_brand(data: &[u8], brand: &[u8; 4]) -> bool {
+        let Some(ftyp) = ftyp(data) else {
+            return false;
+        };
+        if &ftyp[8..12] == brand {
+            return true;
+        }
+        // Major brand (8..12), minor version (12..16), then compatible brands.
+        ftyp.get(16..)
+            .is_some_and(|tail| tail.chunks_exact(4).any(|b| b == brand))
     }
-    Some(&data[..size.min(data.len())])
-}
 
-fn has_brand(data: &[u8], brand: &[u8; 4]) -> bool {
-    let Some(ftyp) = ftyp(data) else {
-        return false;
-    };
-    if &ftyp[8..12] == brand {
-        return true;
+    // image's magic table only matches files whose major brand is literally
+    // "avif". Real encoders also emit "mif1" majors with an "avif" compatible
+    // brand, so detect the container ourselves and leave decoding to
+    // avif-decode (pure Rust, no libavif/dav1d C dependency).
+    pub(super) fn is_avif(data: &[u8]) -> bool {
+        has_brand(data, b"avif") || is_animated(data)
     }
-    // Major brand (8..12), minor version (12..16), then compatible brands.
-    ftyp.get(16..)
-        .is_some_and(|tail| tail.chunks_exact(4).any(|b| b == brand))
+
+    pub(super) fn is_animated(data: &[u8]) -> bool {
+        has_brand(data, b"avis")
+    }
+
+    pub(super) fn dimensions(data: &[u8]) -> Option<(u32, u32)> {
+        let avif = avif_parse::read_avif(&mut &data[..]).ok()?;
+        let meta = avif.primary_item_metadata().ok()?;
+        Some((meta.max_frame_width.get(), meta.max_frame_height.get()))
+    }
+
+    pub(super) fn decode(data: &[u8]) -> Option<DynamicImage> {
+        let decoded = avif_decode::Decoder::from_avif(data)
+            .ok()?
+            .to_image()
+            .ok()?;
+        Some(match decoded {
+            avif_decode::Image::Rgb8(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let mut raw = Vec::with_capacity(buf.len() * 3);
+                for p in buf {
+                    raw.extend_from_slice(&[p.r, p.g, p.b]);
+                }
+                DynamicImage::ImageRgb8(RgbImage::from_raw(w as u32, h as u32, raw)?)
+            }
+            avif_decode::Image::Rgba8(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let mut raw = Vec::with_capacity(buf.len() * 4);
+                for p in buf {
+                    raw.extend_from_slice(&[p.r, p.g, p.b, p.a]);
+                }
+                DynamicImage::ImageRgba8(RgbaImage::from_raw(w as u32, h as u32, raw)?)
+            }
+            avif_decode::Image::Gray8(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let raw: Vec<u8> = buf.into_iter().map(|p| p.value()).collect();
+                DynamicImage::ImageLuma8(GrayImage::from_raw(w as u32, h as u32, raw)?)
+            }
+            avif_decode::Image::Rgb16(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let mut raw = Vec::with_capacity(buf.len() * 3);
+                for p in buf {
+                    raw.extend_from_slice(&[p.r, p.g, p.b]);
+                }
+                DynamicImage::ImageRgb16(ImageBuffer::<Rgb<u16>, _>::from_raw(
+                    w as u32, h as u32, raw,
+                )?)
+            }
+            avif_decode::Image::Rgba16(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let mut raw = Vec::with_capacity(buf.len() * 4);
+                for p in buf {
+                    raw.extend_from_slice(&[p.r, p.g, p.b, p.a]);
+                }
+                DynamicImage::ImageRgba16(ImageBuffer::<image::Rgba<u16>, _>::from_raw(
+                    w as u32, h as u32, raw,
+                )?)
+            }
+            avif_decode::Image::Gray16(img) => {
+                let (buf, w, h) = img.into_contiguous_buf();
+                let raw: Vec<u16> = buf.into_iter().map(|p| p.value()).collect();
+                DynamicImage::ImageLuma16(ImageBuffer::<Luma<u16>, _>::from_raw(
+                    w as u32, h as u32, raw,
+                )?)
+            }
+        })
+    }
 }
 
-// image's magic table only matches files whose major brand is literally
-// "avif". Real encoders also emit "mif1" majors with an "avif" compatible
-// brand, so detect the container ourselves and leave decoding to avif-decode
-// (pure Rust, no libavif/dav1d C dependency).
-fn is_avif(data: &[u8]) -> bool {
-    has_brand(data, b"avif") || avif_is_animated(data)
-}
+#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+mod avif {
+    use super::DynamicImage;
 
-fn avif_is_animated(data: &[u8]) -> bool {
-    has_brand(data, b"avis")
-}
+    pub(super) fn is_avif(_: &[u8]) -> bool {
+        false
+    }
 
-fn avif_dimensions(data: &[u8]) -> Option<(u32, u32)> {
-    let avif = avif_parse::read_avif(&mut &data[..]).ok()?;
-    let meta = avif.primary_item_metadata().ok()?;
-    Some((meta.max_frame_width.get(), meta.max_frame_height.get()))
-}
+    pub(super) fn is_animated(_: &[u8]) -> bool {
+        false
+    }
 
-fn decode_avif(data: &[u8]) -> Option<DynamicImage> {
-    let decoded = avif_decode::Decoder::from_avif(data)
-        .ok()?
-        .to_image()
-        .ok()?;
-    Some(match decoded {
-        avif_decode::Image::Rgb8(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let mut raw = Vec::with_capacity(buf.len() * 3);
-            for p in buf {
-                raw.extend_from_slice(&[p.r, p.g, p.b]);
-            }
-            DynamicImage::ImageRgb8(RgbImage::from_raw(w as u32, h as u32, raw)?)
-        }
-        avif_decode::Image::Rgba8(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let mut raw = Vec::with_capacity(buf.len() * 4);
-            for p in buf {
-                raw.extend_from_slice(&[p.r, p.g, p.b, p.a]);
-            }
-            DynamicImage::ImageRgba8(RgbaImage::from_raw(w as u32, h as u32, raw)?)
-        }
-        avif_decode::Image::Gray8(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let raw: Vec<u8> = buf.into_iter().map(|p| p.value()).collect();
-            DynamicImage::ImageLuma8(GrayImage::from_raw(w as u32, h as u32, raw)?)
-        }
-        avif_decode::Image::Rgb16(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let mut raw = Vec::with_capacity(buf.len() * 3);
-            for p in buf {
-                raw.extend_from_slice(&[p.r, p.g, p.b]);
-            }
-            DynamicImage::ImageRgb16(ImageBuffer::<Rgb<u16>, _>::from_raw(
-                w as u32, h as u32, raw,
-            )?)
-        }
-        avif_decode::Image::Rgba16(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let mut raw = Vec::with_capacity(buf.len() * 4);
-            for p in buf {
-                raw.extend_from_slice(&[p.r, p.g, p.b, p.a]);
-            }
-            DynamicImage::ImageRgba16(ImageBuffer::<image::Rgba<u16>, _>::from_raw(
-                w as u32, h as u32, raw,
-            )?)
-        }
-        avif_decode::Image::Gray16(img) => {
-            let (buf, w, h) = img.into_contiguous_buf();
-            let raw: Vec<u16> = buf.into_iter().map(|p| p.value()).collect();
-            DynamicImage::ImageLuma16(ImageBuffer::<Luma<u16>, _>::from_raw(
-                w as u32, h as u32, raw,
-            )?)
-        }
-    })
+    pub(super) fn dimensions(_: &[u8]) -> Option<(u32, u32)> {
+        None
+    }
+
+    pub(super) fn decode(_: &[u8]) -> Option<DynamicImage> {
+        None
+    }
 }
 
 /// Cheap header-only size probe; returns `None` for non-images or unreadable
 /// headers. Used by imgls so a directory listing never decodes full images.
 pub fn dimensions(data: &[u8]) -> Option<(u32, u32)> {
-    if is_avif(data) {
-        return avif_dimensions(data);
+    if avif::is_avif(data) {
+        return avif::dimensions(data);
     }
     let format = image::guess_format(data).ok()?;
     if !is_image_format(format) {
@@ -141,9 +168,9 @@ pub fn dimensions_file(path: &Path) -> Option<(u32, u32)> {
     let mut head = [0u8; 32];
     let mut probe = File::open(path).ok()?;
     let read = probe.read(&mut head).ok()?;
-    if is_avif(&head[..read]) {
+    if avif::is_avif(&head[..read]) {
         let data = std::fs::read(path).ok()?;
-        return avif_dimensions(&data);
+        return avif::dimensions(&data);
     }
 
     let reader = ImageReader::open(path).ok()?.with_guessed_format().ok()?;
@@ -177,9 +204,9 @@ pub fn is_image_format(format: ImageFormat) -> bool {
 /// Decode `data`, applying EXIF orientation. Returns `None` when the bytes are
 /// not an image we can decode; callers then send the original untouched.
 pub fn decode(data: &[u8]) -> Option<Prepared> {
-    if is_avif(data) {
+    if avif::is_avif(data) {
         return Some(Prepared {
-            image: decode_avif(data)?,
+            image: avif::decode(data)?,
             format: ImageFormat::Avif,
         });
     }
@@ -227,8 +254,8 @@ fn apply_exif_orientation(image: &mut DynamicImage, data: &[u8]) {
 /// Whether the image carries more than one frame (animated GIF/WebP). Such
 /// images are passed through untouched so animation survives.
 pub fn is_animated(data: &[u8]) -> bool {
-    if is_avif(data) {
-        return avif_is_animated(data);
+    if avif::is_avif(data) {
+        return avif::is_animated(data);
     }
     match image::guess_format(data) {
         Ok(ImageFormat::Gif) => {
@@ -330,6 +357,7 @@ pub fn shrink(data: &[u8], max_px: u32) -> Option<Vec<u8>> {
 mod tests {
     use super::*;
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     fn ftyp_file(major: &[u8; 4], brands: &[&[u8; 4]]) -> Vec<u8> {
         let mut body = Vec::new();
         body.extend_from_slice(major);
@@ -344,21 +372,24 @@ mod tests {
         out
     }
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     #[test]
     fn detects_avif_containers() {
-        assert!(is_avif(&ftyp_file(b"avif", &[])));
-        assert!(is_avif(&ftyp_file(b"mif1", &[b"avif"])));
-        assert!(!is_avif(&ftyp_file(b"mif1", &[b"heic"])));
-        assert!(!is_avif(b"\x89PNG\r\n\x1a\n\0\0\0\0"));
-        assert!(!is_avif(b"short"));
+        assert!(avif::is_avif(&ftyp_file(b"avif", &[])));
+        assert!(avif::is_avif(&ftyp_file(b"mif1", &[b"avif"])));
+        assert!(!avif::is_avif(&ftyp_file(b"mif1", &[b"heic"])));
+        assert!(!avif::is_avif(b"\x89PNG\r\n\x1a\n\0\0\0\0"));
+        assert!(!avif::is_avif(b"short"));
     }
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     #[test]
     fn detects_animated_avif() {
-        assert!(avif_is_animated(&ftyp_file(b"avis", &[])));
-        assert!(!avif_is_animated(&ftyp_file(b"avif", &[])));
+        assert!(avif::is_animated(&ftyp_file(b"avis", &[])));
+        assert!(!avif::is_animated(&ftyp_file(b"avif", &[])));
     }
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     #[test]
     fn decodes_real_avif() {
         let data = include_bytes!("../tests/data/sample.avif");
@@ -369,6 +400,7 @@ mod tests {
         assert_eq!((prepared.image.width(), prepared.image.height()), (32, 24));
     }
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     #[test]
     fn transcodes_avif_to_png_even_without_downscaling() {
         let data = include_bytes!("../tests/data/sample.avif");
@@ -376,6 +408,7 @@ mod tests {
         assert!(out.starts_with(b"\x89PNG\r\n\x1a\n"));
     }
 
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     #[test]
     fn probes_avif_dimensions_from_file() {
         let path = Path::new(concat!(

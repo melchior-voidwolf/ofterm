@@ -8,7 +8,7 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
 
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20arm64-lightgrey)
-![Version](https://img.shields.io/badge/version-1.1.3-blue)
+![Version](https://img.shields.io/badge/version-1.1.4-blue)
 
 <table>
   <tr>
@@ -21,7 +21,7 @@ OFTerm is an independent terminal workspace for [fnOS](https://www.fnnas.com/). 
   </tr>
 </table>
 
-> **Status:** 1.1.3. The package builds for x86_64 and arm64. Submission to the fnOS app store is in progress; until it is approved, install the `.fpk` from GitHub Releases.
+> **Status:** 1.1.4. The package builds for x86_64 and arm64. Submission to the fnOS app store is in progress; until it is approved, install the `.fpk` from GitHub Releases.
 
 ## Design
 
@@ -76,7 +76,7 @@ OFTerm is built around three constraints:
 
 `imgcat` and `imgls` are a self-developed Rust binary (`utilities/`, GPL-2.0) rather than scripts wrapping an external tool. It ships with the app and needs nothing installed on the target machine.
 
-- **Zero dependencies** — PNG, JPEG, GIF, WebP, AVIF, BMP, TIFF, ICO, PNM, TGA, DDS, HDR, QOI and EXR decoded in-process.
+- **Zero dependencies** — PNG, JPEG, GIF, WebP, AVIF (x86_64/aarch64), BMP, TIFF, ICO, PNM, TGA, DDS, HDR, QOI and EXR decoded in-process.
 - **Thumbnails before transfer** — images are downscaled to the terminal's pixel size, so a 12 MB photo costs tens of KB on the wire instead of megabytes.
 - **Correct details** — EXIF orientation applied (phone photos are not sideways); animated GIF/WebP passed through untouched; the downscaled copy is only used when it is actually smaller.
 - **No silent failures** — output approaches the terminal's 10M-character OSC limit only after progressive shrinking, and an oversized image produces a clear error instead of vanishing.
@@ -149,9 +149,9 @@ docs/                        architecture, security, privacy, compatibility
 
 ## Download
 
-- **Stable release (x86_64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.3_x86.fpk
-- **Stable release (arm64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.3_arm.fpk
-- **Rolling release-branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.3_x86.fpk (or `ofterm_1.1.3_arm.fpk`).
+- **Stable release (x86_64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_x86.fpk
+- **Stable release (arm64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_arm.fpk
+- **Rolling release-branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.4_x86.fpk (or `ofterm_1.1.4_arm.fpk`).
 
 `fnpack.json` points at the stable release; prerelease builds use the `release` tag explicitly.
 
@@ -185,7 +185,7 @@ chmod +x /tmp/fnpack
 FNPACK=/tmp/fnpack VERSION=0.1.0 node scripts/build-fpk.mjs --all
 ```
 
-Artifacts are written to `build/out/ofterm_1.1.3_x86.fpk` and `build/out/ofterm_1.1.3_arm.fpk`.
+Artifacts are written to `build/out/ofterm_1.1.4_x86.fpk` and `build/out/ofterm_1.1.4_arm.fpk`.
 
 Local development:
 
@@ -199,7 +199,7 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 
 - `.github/workflows/ci.yml` runs on `main`/`master`/PRs: frontend tests/build, backend vet/tests, and linux cross-compilation. It does not publish packages.
 - `.github/workflows/release.yml` runs on the `release` branch and on `v*` tags. Pushes to `release` publish a rolling prerelease (tag `release`); tags publish a stable release.
-- Both channels attach `ofterm_1.1.3_x86.fpk`, `ofterm_1.1.3_arm.fpk`, and `SHA256SUMS`.
+- Both channels attach `ofterm_1.1.4_x86.fpk`, `ofterm_1.1.4_arm.fpk`, and `SHA256SUMS`.
 - `build/architectures.json` is the only architecture source. Adding a Go-supported target does not require backend changes.
 
 ## Security and privacy
