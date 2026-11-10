@@ -17,6 +17,22 @@ func TestUTF8LocaleAddsLocaleWhenMissing(t *testing.T) {
 	}
 }
 
+func TestParsePasswdShell(t *testing.T) {
+	passwd := []byte("root:x:0:0:root:/root:/bin/bash\n" +
+		"# comment\n" +
+		"kail:x:1000:1001::/home/kail:/usr/bin/zsh\n" +
+		"broken\n")
+	for _, tc := range []struct{ uid, want string }{
+		{"0", "/bin/bash"},
+		{"1000", "/usr/bin/zsh"},
+		{"4242", ""},
+	} {
+		if got := parsePasswdShell(passwd, tc.uid); got != tc.want {
+			t.Fatalf("parsePasswdShell(uid=%s) = %q, want %q", tc.uid, got, tc.want)
+		}
+	}
+}
+
 func TestUTF8LocaleRespectsConfiguration(t *testing.T) {
 	for _, env := range [][]string{
 		{"LANG=zh_CN.UTF-8"},

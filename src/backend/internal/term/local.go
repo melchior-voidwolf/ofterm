@@ -76,6 +76,56 @@ func resolveShell(requested string) (string, error) {
 	return requested, nil
 }
 
+// resolveUserShell picks the shell for a session. An explicit request wins.
+// Otherwise the target account's login shell from /etc/passwd is used: the
+// service's own SHELL is not authoritative, because a service manager or a
+// sudo-launched daemon may carry its own value (typically /bin/bash) while the
+// account being switched to logs in with something else.
+func resolveUserShell(requested string, target *user.User) (string, error) {
+	if requested != "" {
+		return resolveShell(requested)
+	}
+	if target != nil {
+		if shell := passwdShell(target.Uid); executable(shell) {
+			return shell, nil
+		}
+	}
+	return defaultShell(), nil
+}
+
+func executable(path string) bool {
+	if path == "" {
+		return false
+	}
+	st, err := os.Stat(path)
+	return err == nil && st.Mode()&0o111 != 0
+}
+
+// passwdShell returns the login shell recorded for uid in /etc/passwd.
+func passwdShell(uid string) string {
+	data, err := os.ReadFile("/etc/passwd")
+	if err != nil {
+		return ""
+	}
+	return parsePasswdShell(data, uid)
+}
+
+// parsePasswdShell extracts the shell (7th field) for uid. Empty or malformed
+// lines are ignored, as are entries for other users.
+func parsePasswdShell(data []byte, uid string) string {
+	for _, line := range strings.Split(string(data), "\n") {
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		fields := strings.Split(line, ":")
+		if len(fields) < 7 || fields[2] != uid {
+			continue
+		}
+		return fields[6]
+	}
+	return ""
+}
+
 // RunAs identifies the fnOS user a shell should run as. Empty values mean the
 // process user (development mode).
 type RunAs struct {
@@ -142,7 +192,11 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 	if grace < 0 {
 		grace = m.grace
 	}
-	shell, err := resolveShell(requestedShell)
+	target, targetUID, targetGID, groups, switchUser, err := resolveRunAs(runAs)
+	if err != nil {
+		return nil, err
+	}
+	shell, err := resolveUserShell(requestedShell, target)
 	if err != nil {
 		return nil, err
 	}
@@ -151,11 +205,6 @@ func (m *Manager) CreateLocal(uid string, runAs *RunAs, cols, rows int, requeste
 		return nil, err
 	}
 	token, err := newResumeToken()
-	if err != nil {
-		return nil, err
-	}
-
-	target, targetUID, targetGID, groups, switchUser, err := resolveRunAs(runAs)
 	if err != nil {
 		return nil, err
 	}
