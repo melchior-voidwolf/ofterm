@@ -2,17 +2,58 @@ name: Release
 
 on:
   push:
-    branches: [release]
     tags:
       - 'v*'
   workflow_dispatch:
 
+# Serialize releases: tag builds commit fnpack.json back to main, so two
+# concurrent runs would race on the same branch and release assets.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  # Gate publishing on the same checks CI runs. Tag pushes do not trigger
+  # ci.yml, so without this job an untested tag can publish a release.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Frontend install & test
+        working-directory: src/frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/backend/go.mod
+          cache-dependency-path: src/backend/go.sum
+
+      - name: Backend vet, test & cross-compile
+        working-directory: src/backend
+        run: |
+          go vet ./...
+          go test ./...
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o /tmp/ofterm-amd64 ./cmd/ofterm
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o /tmp/ofterm-arm64 ./cmd/ofterm
+
   utils-linux:
     runs-on: ubuntu-latest
+    needs: [test]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +81,8 @@ jobs:
 
   utils-darwin:
     runs-on: macos-latest
+    needs: [test]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -68,10 +111,33 @@ jobs:
     runs-on: ubuntu-latest
     # Wait for the macOS job so its artifacts are fully uploaded, but do not
     # let a missing macOS runner block the build: shell fallback covers it.
-    needs: [utils-linux, utils-darwin]
-    if: always() && needs.utils-linux.result == 'success'
+    needs: [test, utils-linux, utils-darwin]
+    if: always() && needs.test.result == 'success' && needs.utils-linux.result == 'success'
+    permissions:
+      contents: write
+      actions: read
+    timeout-minutes: 30
+    env:
+      # Dev builds never reuse a stable version number: a hardcoded value
+      # silently publishes a "1.1.4" build long after 1.1.4 shipped.
+      ROLLING_VERSION: 0.0.0-dev.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Compute release identity
+        id: rel
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            tag="${GITHUB_REF_NAME}"
+            prerelease=false
+          else
+            version="${ROLLING_VERSION}"
+            tag="release"
+            prerelease=true
+          fi
+          printf 'version=%s\ntag=%s\nprerelease=%s\n' \
+            "$version" "$tag" "$prerelease" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@v4
         with:
@@ -103,12 +169,13 @@ jobs:
 
       - name: Build FPK (x86 + arm64)
         env:
-          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '1.1.4' }}
+          VERSION: ${{ steps.rel.outputs.version }}
           FNPACK: fnpack
           UTILS_ALLOW_MISSING: '1'
         run: |
-          export VERSION="${VERSION#v}"
-          chmod +x build/utils/*
+          if compgen -G "build/utils/ofterm-utils-*" > /dev/null; then
+            chmod +x build/utils/ofterm-utils-*
+          fi
           node scripts/build-fpk.mjs --all
           (cd build/out && sha256sum *.fpk > SHA256SUMS)
 
@@ -124,26 +191,50 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'release' }}
-          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '1.1.4' }}
+          TAG: ${{ steps.rel.outputs.tag }}
+          VERSION: ${{ steps.rel.outputs.version }}
+          PRERELEASE: ${{ steps.rel.outputs.prerelease }}
         run: |
-          VERSION="${VERSION#v}"
-          if [ "$TAG" = "release" ]; then
-            gh release create "$TAG" --target "$GITHUB_SHA" --title "Release $VERSION" --prerelease --notes "Rolling release build" 2>/dev/null || true
-          else
-            gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes "OFTerm $TAG" 2>/dev/null || true
+          if ! gh release view "$TAG" > /dev/null 2>&1; then
+            if [ "$PRERELEASE" = "true" ]; then
+              gh release create "$TAG" --target "$GITHUB_SHA" \
+                --title "Rolling build $VERSION" --prerelease \
+                --notes "Rolling build from ${GITHUB_REF_NAME} at ${GITHUB_SHA:0:7}."
+            else
+              gh release create "$TAG" --target "$GITHUB_SHA" \
+                --title "$TAG" --notes "OFTerm $TAG"
+            fi
           fi
-          for old in ofterm_x86.fpk ofterm_arm.fpk; do
-            gh release delete-asset "$TAG" "$old" --yes 2>/dev/null || true
-          done
-          gh release upload "$TAG" build/out/*.fpk build/out/SHA256SUMS build/utils/ofterm-utils-* --clobber
+
+          # Replace only assets produced by earlier rolling builds. Historical
+          # versioned assets stay: third-party fnpack indexes still link to them.
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release edit "$TAG" --title "Rolling build $VERSION" \
+              --notes "Rolling build from ${GITHUB_REF_NAME} at ${GITHUB_SHA:0:7}."
+            gh release view "$TAG" --json assets --jq '.assets[].name' |
+              while read -r name; do
+                case "$name" in
+                  ofterm_0.0.0-dev.* | ofterm_x86.fpk | ofterm_arm.fpk)
+                    gh release delete-asset "$TAG" "$name" --yes || true
+                    ;;
+                esac
+              done
+          fi
+
+          assets=(build/out/*.fpk build/out/SHA256SUMS)
+          shopt -s nullglob
+          utils=(build/utils/ofterm-utils-*)
+          shopt -u nullglob
+          if (( ${#utils[@]} > 0 )); then
+            assets+=("${utils[@]}")
+          fi
+          gh release upload "$TAG" "${assets[@]}" --clobber
 
       - name: Update FnDepot V2 index on main (tag builds)
         if: startsWith(github.ref, 'refs/tags/')
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ steps.rel.outputs.version }}
         run: |
-          export VERSION="${VERSION#v}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main

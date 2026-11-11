@@ -158,7 +158,7 @@ docs/                        architecture, security, privacy, compatibility
 
 - **Stable release (x86_64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_x86.fpk
 - **Stable release (arm64):** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_arm.fpk
-- **Rolling release-branch build:** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.4_x86.fpk (or `ofterm_1.1.4_arm.fpk`).
+- **Rolling/prerelease build:** trigger the Release workflow manually in Actions. It publishes to the `release` tag as `0.0.0-dev.<run-number>` (for example `ofterm_0.0.0-dev.123_x86.fpk`).
 
 `fnpack.json` points at the stable release; prerelease builds use the `release` tag explicitly.
 
@@ -205,8 +205,9 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 ## CI and releases
 
 - `.github/workflows/ci.yml` runs on `main`/`master`/PRs: frontend tests/build, backend vet/tests, and linux cross-compilation. It does not publish packages.
-- `.github/workflows/release.yml` runs on the `release` branch and on `v*` tags. Pushes to `release` publish a rolling prerelease (tag `release`); tags publish a stable release.
-- Both channels attach `ofterm_1.1.4_x86.fpk`, `ofterm_1.1.4_arm.fpk`, and `SHA256SUMS`.
+- `.github/workflows/release.yml` runs on `v*` tags and manual dispatch. Tags publish a stable release; manual runs publish a rolling prerelease to the `release` tag as `0.0.0-dev.<run-number>`. Every release runs the same tests as CI before publishing.
+- `.github/workflows/pages.yml` publishes `site/` to GitHub Pages whenever the site changes on `main`. The Pages source must be set to **GitHub Actions** once (Settings → Pages).
+- Tag builds attach `ofterm_<version>_x86.fpk`, `ofterm_<version>_arm.fpk`, and `SHA256SUMS`; rolling builds use the `0.0.0-dev.<run-number>` version.
 - `build/architectures.json` is the only architecture source. Adding a Go-supported target does not require backend changes.
 
 ## Security and privacy

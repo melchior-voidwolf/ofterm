@@ -156,7 +156,7 @@ docs/                        架构、安全、隐私、兼容性文档
 
 - **稳定版（x86_64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_x86.fpk
 - **稳定版（arm64）：** https://github.com/melchior-voidwolf/ofterm/releases/latest/download/ofterm_1.1.4_arm.fpk
-- **release 分支滚动构建：** https://github.com/melchior-voidwolf/ofterm/releases/download/release/ofterm_1.1.4_x86.fpk（或 `ofterm_1.1.4_arm.fpk`）。
+- **滚动/预发布构建：** 在 Actions 中手动触发 Release，产物发布到 `release` tag，版本号为 `0.0.0-dev.<运行号>`（文件名如 `ofterm_0.0.0-dev.123_x86.fpk`）。
 
 `fnpack.json` 指向稳定版；预发布构建使用显式的 `release` tag。
 
@@ -203,8 +203,9 @@ OFTERM_MODE=direct OFTERM_LISTEN=127.0.0.1:5122 OFTERM_DATA_DIR=/tmp/ofterm-data
 ## CI 与发布
 
 - `.github/workflows/ci.yml`：在 `main`/`master`/PR 上运行前端测试与构建、后端 vet/测试和 Linux 交叉编译，不发布安装包。
-- `.github/workflows/release.yml`：在 `release` 分支和 `v*` tag 上构建。推送到 `release` 发布会滚动预发布（tag 为 `release`）；`v*` tag 发布稳定版。
-- 两个渠道都会附加 `ofterm_1.1.4_x86.fpk`、`ofterm_1.1.4_arm.fpk` 和 `SHA256SUMS`。
+- `.github/workflows/release.yml`：在 `v*` tag 和手动触发时构建。tag 发布稳定版；手动触发会把滚动预发布发到 `release` tag，版本为 `0.0.0-dev.<运行号>`。发布前会运行与 CI 相同的测试。
+- `.github/workflows/pages.yml`：`main` 上的 `site/` 变化会自动发布到 GitHub Pages。需要一次性把 Pages 源设为 **GitHub Actions**（Settings → Pages）。
+- tag 构建附加 `ofterm_<版本>_x86.fpk`、`ofterm_<版本>_arm.fpk` 和 `SHA256SUMS`；滚动构建使用 `0.0.0-dev.<运行号>` 版本号。
 - `build/architectures.json` 是唯一的架构来源。新增 Go 支持的架构不需要修改后端。
 
 ## 安全与隐私
